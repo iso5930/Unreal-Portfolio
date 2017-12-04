@@ -1,0 +1,107 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="99. Default">
+      <UniqueIdentifier>{bd6dbe9e-5608-4fde-90da-b22078eea800}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="00. MainFrm">
+      <UniqueIdentifier>{39eee773-e864-4782-885e-c8f771e19ee7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. View">
+      <UniqueIdentifier>{b70adf57-db76-4331-9d8b-1efeaf2e184f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. View\00. MySheet">
+      <UniqueIdentifier>{c5596ba0-80ae-4434-a0df-144a77ddfd1a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. View\00. MySheet\00. MyPage">
+      <UniqueIdentifier>{b632a074-38e7-4615-9228-5bde172abd91}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02. NetworkMgr">
+      <UniqueIdentifier>{f926c230-44bf-45e9-998a-df4b3c711ca4}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Hunter_Server.h">
+      <Filter>99. Default</Filter>
+    </ClInclude>
+    <ClInclude Include="Hunter_ServerDoc.h">
+      <Filter>99. Default</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>99. Default</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>99. Default</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>99. Default</Filter>
+    </ClInclude>
+    <ClInclude Include="MainFrm.h">
+      <Filter>00. MainFrm</Filter>
+    </ClInclude>
+    <ClInclude Include="Hunter_ServerView.h">
+      <Filter>01. View</Filter>
+    </ClInclude>
+    <ClInclude Include="MySheet.h">
+      <Filter>01. View\00. MySheet</Filter>
+    </ClInclude>
+    <ClInclude Include="MyPage.h">
+      <Filter>01. View\00. MySheet\00. MyPage</Filter>
+    </ClInclude>
+    <ClInclude Include="NetworkMgr.h">
+      <Filter>02. NetworkMgr</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Hunter_Server.cpp">
+      <Filter>99. Default</Filter>
+    </ClCompile>
+    <ClCompile Include="Hunter_ServerDoc.cpp">
+      <Filter>99. Default</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>99. Default</Filter>
+    </ClCompile>
+    <ClCompile Include="MainFrm.cpp">
+      <Filter>00. MainFrm</Filter>
+    </ClCompile>
+    <ClCompile Include="Hunter_ServerView.cpp">
+      <Filter>01. View</Filter>
+    </ClCompile>
+    <ClCompile Include="MySheet.cpp">
+      <Filter>01. View\00. MySheet</Filter>
+    </ClCompile>
+    <ClCompile Include="MyPage.cpp">
+      <Filter>01. View\00. MySheet\00. MyPage</Filter>
+    </ClCompile>
+    <ClCompile Include="NetworkMgr.cpp">
+      <Filter>02. NetworkMgr</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\Hunter_Server.ico">
+      <Filter>99. Default</Filter>
+    </Image>
+    <Image Include="res\Hunter_ServerDoc.ico">
+      <Filter>99. Default</Filter>
+    </Image>
+    <Image Include="res\Toolbar.bmp">
+      <Filter>99. Default</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Hunter_Server.rc">
+      <Filter>99. Default</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\Hunter_Server.rc2">
+      <Filter>99. Default</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt">
+      <Filter>99. Default</Filter>
+    </Text>
+  </ItemGroup>
+</Project>
