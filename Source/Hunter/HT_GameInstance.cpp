@@ -8,7 +8,6 @@
 #include "Runtime/Sockets/Public/SocketSubsystem.h"
 #include "Runtime/Core/Public/HAL/RunnableThread.h"
 #include "HT_LoginThread.h"
-#include <Windows.h>
 
 void UHT_GameInstance::SetNetwork(bool IsCheck)
 {
@@ -18,18 +17,26 @@ void UHT_GameInstance::SetNetwork(bool IsCheck)
 	{
 		FString strID = TEXT("Local Player");
 		FString strPW = TEXT("");
-		lstrcpy(UserInfo.ID, *strID);
-		lstrcpy(UserInfo.PW, *strPW);
+		//lstrcpy(UserInfo.ID, *strID);
+		//lstrcpy(UserInfo.PW, *strPW);
 	}
 }
 
 void UHT_GameInstance::Init_Network(FString ID, FString PW)
 {
 	MemberInfo Info;
-	ZeroMemory(&Info, sizeof(Info));
 
-	lstrcpy(Info.ID, *ID);
-	lstrcpy(Info.PW, *PW);
+	memset(&Info, 0, sizeof(Info));
+
+	for (int i = 0; i < ID.Len(); ++i)
+	{
+		Info.ID[i] = (*ID)[i];
+	}
+
+	for (int i = 0; i < PW.Len(); ++i)
+	{
+		Info.PW[i] = (*PW)[i];
+	}
 
 	UserInfo = Info;
 

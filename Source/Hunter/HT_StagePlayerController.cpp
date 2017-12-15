@@ -11,9 +11,9 @@ void AHT_StagePlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
-	//데디서버 원인은 위젯... ㅁㅊ... 뭐가 문제야...
+	/* 클라이언트에서만 UI를 생성 */
 
-	if (GetWorld()->IsClient() == true) //이게 원인..?
+	if (GetWorld()->IsClient() == true) 
 	{
 		UUserWidget* NewWidget = CreateWidget<UUserWidget>(GetWorld(), StageWidget);
 		NewWidget->AddToViewport();
