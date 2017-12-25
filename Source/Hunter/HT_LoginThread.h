@@ -1,7 +1,9 @@
+#pragma once
+
 #include "HT_GameInstance.h"
 #include "Runtime/Core/Public/HAL/Runnable.h"
 
-class HUNTER_API FHT_LoginThread : public FRunnable
+class FHT_LoginThread : public FRunnable
 {
 private:
 	static FHT_LoginThread* Runnable;

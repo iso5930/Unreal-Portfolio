@@ -79,13 +79,13 @@ void AHT_BaseCharacter::OnInventoryWidget()
 	{
 		if (GameInstance->UserInventoryWidget->GetVisibility() == ESlateVisibility::Visible)
 		{
-			GameInstance->UserInventoryWidget->SetVisibility(ESlateVisibility::Collapsed); //off
+			GameInstance->UserInventoryWidget->SetVisibility(ESlateVisibility::Collapsed);
 			GetWorld()->GetFirstPlayerController()->bShowMouseCursor = false;
 			GetWorld()->GetFirstPlayerController()->bEnableClickEvents = false;
 		}
 		else
 		{
-			GameInstance->UserInventoryWidget->SetVisibility(ESlateVisibility::Visible); //off
+			GameInstance->UserInventoryWidget->SetVisibility(ESlateVisibility::Visible);
 			GetWorld()->GetFirstPlayerController()->bShowMouseCursor = true;
 			GetWorld()->GetFirstPlayerController()->bEnableClickEvents = true;
 		}

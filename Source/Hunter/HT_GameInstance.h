@@ -4,6 +4,7 @@
 
 #include "Engine/GameInstance.h"
 #include "HT_DropItem.h"
+#include "HT_CharacterSlotWidget.h"
 #include "HT_GameInstance.generated.h"
 
 /**
@@ -37,6 +38,8 @@ public:
 
 	class UUserWidget* NPCMenuWidget = NULL;
 
+	class UUserWidget* CharacterSelectWidget = NULL;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "InventoryWidget")
 	TSubclassOf<class UUserWidget> InventorySlotDragWidget;
 
@@ -66,6 +69,9 @@ public:
 
 public:
 	MemberInfo UserInfo;
+
+public:
+	TArray<FCharacter_Info> CharacterData;
 
 public:
 	UPROPERTY(EditDefaultsOnly, Category = "Item")
