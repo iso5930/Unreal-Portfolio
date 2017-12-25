@@ -36,7 +36,7 @@ void AHT_LobbyPlayerController::BeginPlay()
 
 				if (ScrollBox != NULL)
 				{
-					for (int i = 0; i < 3; ++i)
+					for (int i = 0; i < 4; ++i)
 					{
 						UHT_CharacterSlotWidget* CharacterSlotWidget = CreateWidget<UHT_CharacterSlotWidget>(GetWorld(), CharacterSlotWidgetClass);
 

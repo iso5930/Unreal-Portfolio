@@ -3,21 +3,6 @@
 #include "Hunter.h"
 #include "HT_CharacterSlotWidget.h"
 
-FReply UHT_CharacterSlotWidget::NativeOnMouseButtonDoubleClick(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
-{
-	FReply Reply = FReply::Handled();
-
-	if (CharacterInfo.Level != 0) //슬롯에 등록된 정보가 있다면.
-	{
-		if (InMouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
-		{
-			//슬롯을 더블 클릭 할때.
-		}
-	}
-
-	return Reply;
-}
-
 void UHT_CharacterSlotWidget::SetSlot(FCharacter_Info Info)
 {
 	CharacterInfo = Info;

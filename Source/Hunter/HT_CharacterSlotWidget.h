@@ -30,9 +30,8 @@ public:
 	FCharacter_Info CharacterInfo;
 
 public:
-	virtual FReply NativeOnMouseButtonDoubleClick(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
-
 	void SetSlot(FCharacter_Info Info);
+
 protected:
 	virtual void NativeConstruct() override;
 };

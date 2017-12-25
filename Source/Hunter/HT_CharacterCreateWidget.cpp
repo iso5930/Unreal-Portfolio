@@ -40,7 +40,7 @@ void UHT_CharacterCreateWidget::CreateCharacter(FString Name)
 				SlotWidget->SetSlot(Info);
 
 				break;
-			}			
+			}
 		}
 	}
 }
