@@ -73,6 +73,8 @@ public:
 public:
 	TArray<FCharacter_Info> CharacterData;
 
+	int CharacterCurIndex;
+
 public:
 	UPROPERTY(EditDefaultsOnly, Category = "Item")
 	TArray<FItem_Info> Item_DataBase;

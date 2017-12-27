@@ -3,17 +3,63 @@
 #include "Hunter.h"
 #include "HT_CharacterSelectWidget.h"
 #include "HT_CharacterSlotWidget.h"
+#include <ScrollBox.h>
+#include "HT_GameInstance.h"
 
-void UHT_CharacterSelectWidget::CreateCharacter()
+void UHT_CharacterSelectWidget::ReflashSlot(int Index, bool IsCheck)
 {
-	//캐릭터 생성.
+	UScrollBox* ScrollBox = Cast<UScrollBox>(GetWidgetFromName("CharacterSlotList"));
 
-	//슬롯의 빈자리가 없다면 생성 불가. <- 이건 나중에  추가하고.
+	if (ScrollBox != NULL)
+	{
+		int Cnt = ScrollBox->GetChildrenCount();
 
-	//캐릭터 생성 UI 만들기.
+		for (int i = 0; i < Cnt; ++i)
+		{
+			UHT_CharacterSlotWidget* SlotWidget = Cast<UHT_CharacterSlotWidget>(ScrollBox->GetChildAt(i));
+
+			if (SlotWidget != NULL)
+			{
+				SlotWidget->SetBackGroundColor(false);
+			}
+		}
+
+		CurIndex = -1;
+
+		if (IsCheck)
+		{
+			CurIndex = Index;
+
+			UHT_CharacterSlotWidget* SlotWidget = Cast<UHT_CharacterSlotWidget>(ScrollBox->GetChildAt(Index));
+
+			if (SlotWidget != NULL)
+			{
+				SlotWidget->SetBackGroundColor(true);
+			}
+		}
+	}
 }
 
 void UHT_CharacterSelectWidget::DeleteCharacter()
 {
 	//캐릭터 삭제.
+}
+
+bool UHT_CharacterSelectWidget::OnClickGameStart()
+{
+	if (CurIndex == -1)
+	{
+		return false;
+	}
+
+	UHT_GameInstance* GameInstance = Cast<UHT_GameInstance>(GetWorld()->GetGameInstance());
+
+	if (GameInstance != NULL)
+	{
+		GameInstance->CharacterCurIndex = CurIndex;
+
+		return true;
+	}
+
+	return false;
 }

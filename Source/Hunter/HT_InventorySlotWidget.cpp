@@ -30,7 +30,7 @@ FReply UHT_InventorySlotWidget::NativeOnMouseButtonDown(const FGeometry& InGeome
 		}
 		else if (InMouseEvent.GetEffectingButton() == EKeys::RightMouseButton)
 		{
-
+			//아이템 사용.
 		}
 	}
 

@@ -6,6 +6,7 @@
 #include <UserWidget.h>
 #include <ScrollBox.h>
 #include "HT_CharacterSlotWidget.h"
+#include "HT_CharacterSelectWidget.h"
 
 void AHT_LobbyPlayerController::BeginPlay()
 {
@@ -46,6 +47,7 @@ void AHT_LobbyPlayerController::BeginPlay()
 						}
 
 						CharacterSlotWidget->SetSlot(FCharacter_Info());
+						CharacterSlotWidget->index = i;
 					}
 				}
 			}

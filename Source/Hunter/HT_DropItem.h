@@ -5,16 +5,25 @@
 #include "GameFramework/Actor.h"
 #include "HT_DropItem.generated.h"
 
+UENUM(BlueprintType)
+enum class E_ITEM_TYPE : uint8
+{
+	ITEM_TYPE_NONE UMETA(DisplayName = "ITEM_TYPE_NONE"), //기타 아이템, 일명 잡템
+	ITEM_TYPE_WEAPON UMETA(DisplayName = "ITEM_TYPE_WEAPON"), //캐릭터가 장착할 수 있는 무기
+	ITEM_TYPE_EQUIP UMETA(DisplayName = "ITEM_TYPE_EQUIP"), //캐릭터가 장착할 수 있는 방어구
+	ITEM_TYPE_POTION UMETA(DisplayName = "ITEM_TYPE_POTION") //포션
+};
+
 USTRUCT(BlueprintType)
 struct FItem_Info
 {
 	GENERATED_USTRUCT_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
-	UTexture2D* Item_Image;
+	UTexture2D* Item_Image; //인벤토리에 보일 이미지.
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
-	FString Item_Name;
+	FString Item_Name; //아이템의 이름
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
 	int32 Item_Num;
@@ -24,6 +33,9 @@ struct FItem_Info
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
 	int32 Item_MaxCnt;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
+	E_ITEM_TYPE Item_Type = E_ITEM_TYPE::ITEM_TYPE_NONE;
 
 	FItem_Info()
 		:Item_Image(NULL), Item_Name(TEXT("None")), Item_Num(0), Item_Cnt(1), Item_MaxCnt(1)

@@ -12,11 +12,17 @@ UCLASS()
 class HUNTER_API UHT_CharacterSelectWidget : public UUserWidget
 {
 	GENERATED_BODY()
+
+public:
+	int CurIndex; //활성화된 인덱스.
+
+public:
+	void ReflashSlot(int Index, bool IsCheck);
 	
 public:
 	UFUNCTION(BlueprintCallable)
-	void CreateCharacter();
+	void DeleteCharacter();
 
 	UFUNCTION(BlueprintCallable)
-	void DeleteCharacter();
+	bool OnClickGameStart();
 };
