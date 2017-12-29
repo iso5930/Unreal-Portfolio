@@ -6,6 +6,7 @@
 #include "HT_GameInstance.h"
 #include "HT_InventoryWidget.h"
 #include "HT_ItemToolTipWidget.h"
+#include "HT_EquipInventory_Widget.h"
 
 UHT_InventorySlotWidget::UHT_InventorySlotWidget(const FObjectInitializer & ObjectInitializer)
 	:Super(ObjectInitializer)
@@ -30,7 +31,44 @@ FReply UHT_InventorySlotWidget::NativeOnMouseButtonDown(const FGeometry& InGeome
 		}
 		else if (InMouseEvent.GetEffectingButton() == EKeys::RightMouseButton)
 		{
-			//아이템 사용.
+			UHT_GameInstance* GameInstance = Cast<UHT_GameInstance>(GetWorld()->GetGameInstance());
+
+			if (GameInstance == NULL)
+				return Reply;
+
+			UHT_InventoryWidget* InventoryWidget = Cast<UHT_InventoryWidget>(GameInstance->UserInventoryWidget);
+
+			if (InventoryWidget == NULL)
+				return Reply;
+
+			FItem_Info TempItem = InventoryWidget->InventoryData[SlotIndex];
+
+			switch (SlotItem.Item_Type)
+			{
+			case E_ITEM_TYPE::ITEM_TYPE_EQUIP:
+
+				break;
+
+			case E_ITEM_TYPE::ITEM_TYPE_WEAPON_SCYTHE:
+
+				InventoryWidget->InventoryData[SlotIndex] = GameInstance->EquipWidget->Equip_Data[(int)E_EQUIP_SLOT_TYPE::EQUIP_SLOT_WEAPON];
+				GameInstance->EquipWidget->Equip_Data[(int)E_EQUIP_SLOT_TYPE::EQUIP_SLOT_WEAPON] = TempItem;
+
+				GameInstance->EquipWidget->ReflashSlot();
+
+				break;
+
+			case E_ITEM_TYPE::ITEM_TYPE_WEAPON_DUAL_BLADE:
+
+				InventoryWidget->InventoryData[SlotIndex] = GameInstance->EquipWidget->Equip_Data[(int)E_EQUIP_SLOT_TYPE::EQUIP_SLOT_WEAPON];
+				GameInstance->EquipWidget->Equip_Data[(int)E_EQUIP_SLOT_TYPE::EQUIP_SLOT_WEAPON] = TempItem;
+
+				GameInstance->EquipWidget->ReflashSlot();
+
+				break;
+			}
+
+			InventoryWidget->ReflashSlot();
 		}
 	}
 
@@ -119,23 +157,32 @@ FReply UHT_InventorySlotWidget::NativeOnMouseMove(const FGeometry& InGeometry, c
 
 		if (GameInstance != NULL)
 		{
-			FVector2D InventoryPos = GameInstance->UserInventoryWidget->Postion;
+			FVector2D WidgetPos;
 
-			if (InventoryPos.X >= 640)
+			if (ItemSlotType == E_ITEM_SLOT_TYPE::ITEM_SLOT_INVENTORY)
 			{
-				InventoryPos.X -= 350;
+				WidgetPos = GameInstance->UserInventoryWidget->Postion;
+			}
+			else if (ItemSlotType == E_ITEM_SLOT_TYPE::ITEM_SLOT_EQUIP)
+			{
+				WidgetPos = GameInstance->EquipWidget->Postion;
+			}
+
+			if (WidgetPos.X >= 640)
+			{
+				WidgetPos.X -= 350;
 			}
 			else
 			{
-				InventoryPos.X += 370;
+				WidgetPos.X += 370;
 			}
 
-			UE_LOG(LogClass, Warning, TEXT("%f / %f"), InventoryPos.X, InventoryPos.Y);
+			UE_LOG(LogClass, Warning, TEXT("%f / %f"), WidgetPos.X, WidgetPos.Y);
 
 			GameInstance->ItemToolTipWidget->SetVisibility(ESlateVisibility::Visible);
 			GameInstance->ItemToolTipWidget->RemoveFromParent();
 			GameInstance->ItemToolTipWidget->AddToViewport();
-			GameInstance->ItemToolTipWidget->SetPositionInViewport(InventoryPos, false);
+			GameInstance->ItemToolTipWidget->SetPositionInViewport(WidgetPos, false);
 
 			UHT_ItemToolTipWidget* ItemToolTipWidget = Cast<UHT_ItemToolTipWidget>(GameInstance->ItemToolTipWidget);
 			ItemToolTipWidget->ItemImage = SlotItem.Item_Image;

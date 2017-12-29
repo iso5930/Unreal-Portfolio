@@ -6,6 +6,7 @@
 #include "HT_GameInstance.h"
 #include "HT_DropItemWidget.h"
 #include "HT_StageWidget.h"
+#include "HT_EquipInventory_Widget.h"
 
 void AHT_StagePlayerController::BeginPlay()
 {
@@ -37,6 +38,9 @@ void AHT_StagePlayerController::BeginPlay()
 			GameInstance->ChattingWidget = Cast<UUserWidget>(NewWidget->GetWidgetFromName("ChattingLogWidget"));
 
 			GameInstance->StageWidet = Cast<UHT_StageWidget>(NewWidget);
+
+			GameInstance->EquipWidget = Cast<UHT_EquipInventory_Widget>(NewWidget->GetWidgetFromName("EquipInventoryWidget"));
+			//GameInstance->EquipWidget->SetVisibility(ESlateVisibility::Collapsed);
 		}
 	}
 }

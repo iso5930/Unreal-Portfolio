@@ -27,7 +27,6 @@ public:
 
 public:
 	class UHT_InventoryWidget* UserInventoryWidget;
-	class UUserWidget* UserEquipWidget;
 	class UUserWidget* ChattingWidget;
 	class UUserWidget* ChattingInputWidget;
 
@@ -39,6 +38,8 @@ public:
 	class UUserWidget* NPCMenuWidget = NULL;
 
 	class UUserWidget* CharacterSelectWidget = NULL;
+
+	class UHT_EquipInventory_Widget* EquipWidget;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "InventoryWidget")
 	TSubclassOf<class UUserWidget> InventorySlotDragWidget;

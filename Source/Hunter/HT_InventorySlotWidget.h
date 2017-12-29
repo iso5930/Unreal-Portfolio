@@ -6,6 +6,13 @@
 #include "HT_DropItem.h"
 #include "HT_InventorySlotWidget.generated.h"
 
+UENUM(BlueprintType)
+enum class E_ITEM_SLOT_TYPE : uint8
+{
+	ITEM_SLOT_INVENTORY UMETA(DisplayName = "ITEM_SLOT_INVENTORY"),
+	ITEM_SLOT_EQUIP UMETA(DisplayName = "ITEM_SLOT_EQUIP")
+};
+
 /**
  * 
  */
@@ -21,9 +28,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FItem_Info SlotItem;
 
-public:
 	UPROPERTY(BlueprintReadWrite)
 	int SlotIndex;
+
+	UPROPERTY(BlueprintReadWrite)
+	E_ITEM_SLOT_TYPE ItemSlotType;
 
 private:
 	class ULocalPlayer* PlayerOwner;
