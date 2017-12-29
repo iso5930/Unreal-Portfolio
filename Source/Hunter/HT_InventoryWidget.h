@@ -28,7 +28,13 @@ public:
 	FVector2D MouseOffSet;
 
 public:
+	UFUNCTION(BlueprintCallable)
 	void ReflashSlot();
+
+	UFUNCTION(BlueprintCallable)
+	void Init_Inventory();
+
+public:
 	void AddItem(FItem_Info NewItemInfo);
 	void SetPos(FVector2D vPos);
 

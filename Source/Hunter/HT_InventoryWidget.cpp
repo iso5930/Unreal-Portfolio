@@ -4,12 +4,98 @@
 #include "HT_InventoryWidget.h"
 #include "HT_InventorySlotWidget.h"
 #include "HT_InventoryDragDropOperation.h"
+#include "HT_GameInstance.h"
 
 void UHT_InventoryWidget::ReflashSlot()
 {
 	for (int i = 0; i < 30; ++i)
 	{
 		InventorySlotArray[i]->SlotItem = InventoryData[i];
+	}
+
+	UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("인벤토리 새로고침"));
+}
+
+void UHT_InventoryWidget::Init_Inventory()
+{
+	//우선 비우고.
+	InventoryData.Empty();
+
+	UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("인벤토리 초기화"));
+
+	UHT_GameInstance* GameInstance = NULL;
+
+	if (GetWorld() != NULL)
+	{
+		GameInstance = Cast<UHT_GameInstance>(GetWorld()->GetGameInstance());
+
+		UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("인벤토리 1페"));
+	}
+
+	if (GameInstance != NULL)
+	{
+		if (GameInstance->CharacterData.Num() <= GameInstance->CharacterCurIndex)
+		{
+			for (int i = 0; i < 30; ++i)
+			{
+				InventoryData.Add(FItem_Info());
+			} //인벤토리 초기화 구문.
+
+			UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("인벤토리 불러오기 실패"));
+
+			return;
+		}
+
+		FString CharacterName = GameInstance->CharacterData[GameInstance->CharacterCurIndex].Name;
+
+		FString FullPath = FString::Printf(TEXT("%s%s%s"), *FPaths::GameSavedDir(), *CharacterName, TEXT(".txt"));
+
+		TSharedPtr<FArchive> FileReader = MakeShareable(IFileManager::Get().CreateFileReader(*FullPath));
+
+		if (FileReader.IsValid())
+		{
+			FCharacter_Info NewInfo;
+
+			int InventorySize;
+
+			*FileReader.Get() << NewInfo.Name;
+			*FileReader.Get() << NewInfo.Level;
+
+			UE_LOG(LogClass, Warning, TEXT("Name %s , Level %d"), *NewInfo.Name, NewInfo.Level);
+
+			*FileReader.Get() << InventorySize;
+
+			for (int i = 0; i < InventorySize; ++i)
+			{
+				FItem_Info ItemInfo;
+
+				int ItemNum = 0;
+				int ItemCnt = 0;
+
+				*FileReader << ItemNum;
+				*FileReader << ItemCnt;
+
+				UE_LOG(LogClass, Warning, TEXT("ItemNum %d , Cnt %d"), ItemNum, ItemCnt);
+
+				if (ItemNum != 0)
+				{
+					ItemInfo = GameInstance->Item_DataBase[ItemNum];
+
+					ItemInfo.Item_Cnt = ItemCnt;
+				}
+
+				InventoryData.Add(ItemInfo);
+			}
+
+			FileReader->Close();
+		}
+		else
+		{
+			for (int i = 0; i < 30; ++i)
+			{
+				InventoryData.Add(FItem_Info());
+			} //인벤토리 초기화 구문.
+		}
 	}
 }
 
@@ -87,10 +173,7 @@ void UHT_InventoryWidget::SetPos(FVector2D vPos)
 UHT_InventoryWidget::UHT_InventoryWidget(const FObjectInitializer& ObjectInitializer)
 	:Super(ObjectInitializer)
 {
-	for (int i = 0; i < 30; ++i)
-	{
-		InventoryData.Add(FItem_Info());
-	}
+	
 }
 
 FReply UHT_InventoryWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)

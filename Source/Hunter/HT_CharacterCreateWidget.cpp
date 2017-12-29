@@ -5,6 +5,7 @@
 #include "HT_CharacterSlotWidget.h"
 #include "HT_GameInstance.h"
 #include <ScrollBox.h>
+#include "HT_DropItem.h"
 
 void UHT_CharacterCreateWidget::CreateCharacter(FString Name)
 {
@@ -39,6 +40,95 @@ void UHT_CharacterCreateWidget::CreateCharacter(FString Name)
 			{
 				SlotWidget->SetSlot(Info);
 
+				/*
+				
+				캐릭 아이디.txt 넣는 순서.
+
+				FCharacter_Info
+
+				vector<FItem_Info>
+
+				*/
+
+				FString FullPath = FString::Printf(TEXT("%s%s%s"), *FPaths::GameSavedDir(), *Name, TEXT(".txt"));
+
+				FArchive* ArWriter = IFileManager::Get().CreateFileWriter(*FullPath);
+
+				TArray<FItem_Info> Inventory;
+
+				for (int j = 0; j < 30; ++j)
+				{
+					Inventory.Add(FItem_Info());
+				}
+
+				FItem_Info StartWeapon;
+
+				
+				switch (StartWeaponType)
+				{
+				case E_WEAPON_TYPE::WEAPON_SCYTHE:
+
+					StartWeapon.Item_Num = 7;
+
+					break;
+
+				case E_WEAPON_TYPE::WEAPON_DUAL_BLADE:
+
+					StartWeapon.Item_Num = 8;
+
+					break;
+				}
+
+				Inventory[0] = StartWeapon;
+
+				int InventorySize = Inventory.Num();
+
+				if (ArWriter)
+				{
+					*ArWriter << Info.Name;
+					*ArWriter << Info.Level;
+					*ArWriter << InventorySize;
+
+					for (int j = 0; j < 30; ++j)
+					{
+						*ArWriter << Inventory[j].Item_Num;
+						*ArWriter << Inventory[j].Item_Cnt;
+					}
+
+					ArWriter->Close();
+
+					delete ArWriter;
+
+					ArWriter = NULL;
+				}
+				
+				/*
+
+				//파일 읽기.
+
+				TSharedPtr<FArchive> FileReader = MakeShareable(IFileManager::Get().CreateFileReader(*FullPath));
+
+				if (FileReader.IsValid())
+				{
+					FCharacter_Info NewInfo;
+
+					*FileReader.Get() << NewInfo.Name;
+					*FileReader.Get() << NewInfo.Level;
+
+					UE_LOG(LogClass, Warning, TEXT("Name %s , Level %d"), *NewInfo.Name, NewInfo.Level);
+
+					*FileReader.Get() << InventorySize;
+
+					for (int j = 0; j < InventorySize; ++j)
+					{
+						*FileReader << Inventory[j].Item_Num;
+						*FileReader << Inventory[j].Item_Cnt;
+					}
+
+					FileReader->Close();
+				}
+
+				*/
 				break;
 			}
 		}

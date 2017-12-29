@@ -9,7 +9,8 @@ UENUM(BlueprintType)
 enum class E_ITEM_TYPE : uint8
 {
 	ITEM_TYPE_NONE UMETA(DisplayName = "ITEM_TYPE_NONE"), //기타 아이템, 일명 잡템
-	ITEM_TYPE_WEAPON UMETA(DisplayName = "ITEM_TYPE_WEAPON"), //캐릭터가 장착할 수 있는 무기
+	ITEM_TYPE_WEAPON_SCYTHE UMETA(DisplayName = "ITEM_TYPE_WEAPON_SCYTHE"), //캐릭터가 장착할 수 있는 무기
+	ITEM_TYPE_WEAPON_DUAL_BLADE UMETA(DisplayName = "ITEM_TYPE_WEAPON_DUAL_BLADE"),
 	ITEM_TYPE_EQUIP UMETA(DisplayName = "ITEM_TYPE_EQUIP"), //캐릭터가 장착할 수 있는 방어구
 	ITEM_TYPE_POTION UMETA(DisplayName = "ITEM_TYPE_POTION") //포션
 };
@@ -26,7 +27,7 @@ struct FItem_Info
 	FString Item_Name; //아이템의 이름
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
-	int32 Item_Num;
+	int32 Item_Num; //아이템 고유 번호.
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
 	int32 Item_Cnt;
