@@ -20,6 +20,8 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Widget, meta = (AllowPrivateAccess = "true"))
 	class UWidgetComponent* UserNameWidget;
 
+	class AHT_BaseWeapon* Weapon;
+
 private:
 	TArray<class AHT_DropItem*> DropItemArr;
 

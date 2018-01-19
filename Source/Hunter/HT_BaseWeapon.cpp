@@ -17,6 +17,11 @@ void AHT_BaseWeapon::BeginPlay()
 	Super::BeginPlay();
 }
 
+void AHT_BaseWeapon::Attack()
+{
+
+}
+
 // Called every frame
 void AHT_BaseWeapon::Tick(float DeltaTime)
 {

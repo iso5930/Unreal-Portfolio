@@ -11,6 +11,7 @@ void UHT_InventoryWidget::ReflashSlot()
 	for (int i = 0; i < 30; ++i)
 	{
 		InventorySlotArray[i]->SlotItem = InventoryData[i];
+		InventorySlotArray[i]->ItemSlotType = E_ITEM_SLOT_TYPE::ITEM_SLOT_INVENTORY;
 	}
 
 	UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("인벤토리 새로고침"));

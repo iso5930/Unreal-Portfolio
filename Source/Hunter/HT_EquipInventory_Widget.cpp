@@ -11,6 +11,7 @@ void UHT_EquipInventory_Widget::ReflashSlot()
 	for (int i = 0; i < (int)E_EQUIP_SLOT_TYPE::EQUIP_SLOT_END; ++i)
 	{
 		EquipSlotArray[i]->SlotItem = Equip_Data[i];
+		EquipSlotArray[i]->ItemSlotType = E_ITEM_SLOT_TYPE::ITEM_SLOT_EQUIP;
 	}
 }
 
