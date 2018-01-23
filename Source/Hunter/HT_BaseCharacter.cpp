@@ -10,6 +10,7 @@
 #include "WidgetComponent.h"
 #include "HT_UserNameWidget.h"
 #include "ScrollBox.h"
+#include "HT_BaseWeapon.h"
 
 // Sets default values
 AHT_BaseCharacter::AHT_BaseCharacter()
@@ -178,10 +179,17 @@ void AHT_BaseCharacter::OnInputTextWidget()
 
 void AHT_BaseCharacter::OnTestFunction()
 {
-	if (OverlapNPC != NULL)
+	/*if (OverlapNPC != NULL)
 	{
 		OverlapNPC->NPCMenuWidgetPopup();
-	}
+	}*/
+
+	IsWeaponChange = true;
+}
+
+FName AHT_BaseCharacter::GetWeaponAttachPointName() const
+{
+	return WeaponAttachPointName;
 }
 
 void AHT_BaseCharacter::OnOverlapBegin(class UPrimitiveComponent* OverlappingComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -221,6 +229,16 @@ void AHT_BaseCharacter::BeginPlay()
 	{
 		UHT_GameInstance* GameInstance = Cast<UHT_GameInstance>(GetWorld()->GetGameInstance());
 		Widget->UserName = GameInstance->UserInfo.ID;
+	}
+
+	if (TestWeaponClass != NULL)
+	{
+		FRotator SpawnRotation(-3.0f, 35.0f, 271.0f);
+		FVector SpawnLocal(0.0f, 0.0f, 0.0f);
+
+		Weapon = GetWorld()->SpawnActor<AHT_BaseWeapon>(TestWeaponClass, SpawnLocal, SpawnRotation);
+		Weapon->OwnerCharacter = this;
+		Weapon->AttachMeshToPawn();
 	}
 }
 

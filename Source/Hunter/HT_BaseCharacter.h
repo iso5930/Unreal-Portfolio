@@ -20,12 +20,23 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Widget, meta = (AllowPrivateAccess = "true"))
 	class UWidgetComponent* UserNameWidget;
 
-	class AHT_BaseWeapon* Weapon;
+	UPROPERTY(EditDefaultsOnly, Category = Weapon)
+	TSubclassOf<class AHT_BaseWeapon> TestWeaponClass;
 
 private:
 	TArray<class AHT_DropItem*> DropItemArr;
 
 	class AHT_BaseNPC* OverlapNPC;
+
+public:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Weapon)
+	FName WeaponAttachPointName;
+
+	UPROPERTY(BlueprintReadOnly)
+	class AHT_BaseWeapon* Weapon;
+	
+	UPROPERTY(BlueprintReadWrite)
+	bool IsWeaponChange = false;
 	
 public:
 	// Sets default values for this character's properties
@@ -44,6 +55,9 @@ public:
 
 public:
 	void OnTestFunction();
+
+public:
+	FName GetWeaponAttachPointName() const;
 
 public:
 	UFUNCTION()

@@ -18,7 +18,7 @@ class HUNTER_API AHT_BaseWeapon : public AActor
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(VisibleDefaultsOnly)
 	USkeletalMeshComponent * WeaponMesh;
 
 public:
@@ -28,6 +28,9 @@ public:
 public:	
 	// Sets default values for this actor's properties
 	AHT_BaseWeapon();
+
+public:
+	void AttachMeshToPawn();
 
 protected:
 	// Called when the game starts or when spawned
