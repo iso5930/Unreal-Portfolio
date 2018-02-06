@@ -7,6 +7,7 @@
 #include "HT_InventoryWidget.h"
 #include "HT_ItemToolTipWidget.h"
 #include "HT_EquipInventory_Widget.h"
+#include "HT_BaseCharacter.h"
 
 UHT_InventorySlotWidget::UHT_InventorySlotWidget(const FObjectInitializer & ObjectInitializer)
 	:Super(ObjectInitializer)
@@ -41,32 +42,56 @@ FReply UHT_InventorySlotWidget::NativeOnMouseButtonDown(const FGeometry& InGeome
 			if (InventoryWidget == NULL)
 				return Reply;
 
+			APawn* Actor = GetWorld()->GetFirstLocalPlayerFromController()->GetPlayerController(GetWorld())->GetPawn();
+
+			AHT_BaseCharacter* Player = Cast<AHT_BaseCharacter>(Actor);
+
+			if (Player != NULL)
+			{
+				UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("캐스팅 성공"));
+			}
+			else if(Player == NULL)
+			{
+				UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("캐스팅 실패"));
+			}
+
 			FItem_Info TempItem = InventoryWidget->InventoryData[SlotIndex];
 
-			switch (SlotItem.Item_Type)
+			if (ItemSlotType == E_ITEM_SLOT_TYPE::ITEM_SLOT_INVENTORY)
 			{
-			case E_ITEM_TYPE::ITEM_TYPE_EQUIP:
+				switch (SlotItem.Item_Type)
+				{
+				case E_ITEM_TYPE::ITEM_TYPE_EQUIP:
 
-				break;
+					break;
 
-			case E_ITEM_TYPE::ITEM_TYPE_WEAPON_SCYTHE:
+				case E_ITEM_TYPE::ITEM_TYPE_WEAPON_SCYTHE:
 
-				InventoryWidget->InventoryData[SlotIndex] = GameInstance->EquipWidget->Equip_Data[(int)E_EQUIP_SLOT_TYPE::EQUIP_SLOT_WEAPON];
-				GameInstance->EquipWidget->Equip_Data[(int)E_EQUIP_SLOT_TYPE::EQUIP_SLOT_WEAPON] = TempItem;
+					InventoryWidget->InventoryData[SlotIndex] = GameInstance->EquipWidget->Equip_Data[(int)E_EQUIP_SLOT_TYPE::EQUIP_SLOT_WEAPON];
+					GameInstance->EquipWidget->Equip_Data[(int)E_EQUIP_SLOT_TYPE::EQUIP_SLOT_WEAPON] = TempItem;
 
-				GameInstance->EquipWidget->ReflashSlot();
+					Player->WeaponChange(TempItem);
 
-				break;
+					GameInstance->EquipWidget->ReflashSlot();
 
-			case E_ITEM_TYPE::ITEM_TYPE_WEAPON_DUAL_BLADE:
+					break;
 
-				InventoryWidget->InventoryData[SlotIndex] = GameInstance->EquipWidget->Equip_Data[(int)E_EQUIP_SLOT_TYPE::EQUIP_SLOT_WEAPON];
-				GameInstance->EquipWidget->Equip_Data[(int)E_EQUIP_SLOT_TYPE::EQUIP_SLOT_WEAPON] = TempItem;
+				case E_ITEM_TYPE::ITEM_TYPE_WEAPON_DUAL_BLADE:
 
-				GameInstance->EquipWidget->ReflashSlot();
+					InventoryWidget->InventoryData[SlotIndex] = GameInstance->EquipWidget->Equip_Data[(int)E_EQUIP_SLOT_TYPE::EQUIP_SLOT_WEAPON];
+					GameInstance->EquipWidget->Equip_Data[(int)E_EQUIP_SLOT_TYPE::EQUIP_SLOT_WEAPON] = TempItem;
 
-				break;
+					Player->WeaponChange(TempItem);
+
+					GameInstance->EquipWidget->ReflashSlot();
+
+					break;
+				}
 			}
+			else if (ItemSlotType == E_ITEM_SLOT_TYPE::ITEM_SLOT_EQUIP)
+			{
+				
+			}		
 
 			InventoryWidget->ReflashSlot();
 		}

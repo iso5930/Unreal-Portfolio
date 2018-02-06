@@ -3,7 +3,21 @@
 #pragma once
 
 #include "GameFramework/Character.h"
+#include "HT_DropItem.h"
+#include "HT_BaseWeapon.h"
 #include "HT_BaseCharacter.generated.h"
+
+UENUM(BlueprintType)
+enum class E_PLAYER_STATE : uint8
+{
+	PLAYER_STATE_IDLE UMETA(DisplayName = "PLAYER_IDLE"),
+	PLAYER_STATE_RUN UMETA(DisplayName = "PLAYER_RUN"),
+	PLAYER_STATE_ATTACK01 UMETA(DisplayName = "PLAYER_ATTACK01"),
+	PLAYER_STATE_ATTACK02 UMETA(DisplayName = "PLAYER_ATTACK02"),
+	PLAYER_STATE_ATTACK03 UMETA(DisplayName = "PLAYER_ATTACK03"),
+	PLAYER_STATE_ATTACK04 UMETA(DisplayName = "PLAYER_ATTACK04"),
+	PLAYER_STATE_HIT UMETA(DisplayName = "HIT")
+};
 
 UCLASS()
 class HUNTER_API AHT_BaseCharacter : public ACharacter
@@ -28,11 +42,13 @@ private:
 
 	class AHT_BaseNPC* OverlapNPC;
 
+	E_PLAYER_STATE PlayerState;
+
 public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Weapon)
 	FName WeaponAttachPointName;
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadWrite)
 	class AHT_BaseWeapon* Weapon;
 	
 	UPROPERTY(BlueprintReadWrite)
@@ -48,6 +64,7 @@ public:
 
 public:
 	void OnInventoryWidget();
+	void Attack();
 	void Test();
 	void Action_ItemTake();
 
@@ -58,6 +75,14 @@ public:
 
 public:
 	FName GetWeaponAttachPointName() const;
+	void WeaponChange(FItem_Info NewWeaponInfo);
+
+public:
+	UFUNCTION(BlueprintCallable)
+	void SetPlayerState(E_PLAYER_STATE NewPlayerState);
+
+	UFUNCTION(BlueprintCallable)
+	E_PLAYER_STATE GetPlayerState();
 
 public:
 	UFUNCTION()

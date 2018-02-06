@@ -24,13 +24,34 @@ public:
 public:
 	E_WEAPON_TYPE WeaponType;
 	class AHT_BaseCharacter* OwnerCharacter;
+
+protected:
+	UAnimMontage* Attack01_Montage;
+	UAnimMontage* Attack02_Montage;
+	UAnimMontage* Attack03_Montage;
+	UAnimMontage* Attack04_Montage;
+
+protected:
+	int32 WeaponIndex;
+	bool IsNextAttack;
 	
 public:	
 	// Sets default values for this actor's properties
 	AHT_BaseWeapon();
 
 public:
-	void AttachMeshToPawn();
+	bool SetWeaponIndex(int32 Index);
+	void SetWeaponType(E_WEAPON_TYPE NewType);
+
+public:
+	void AttachMeshToPawn(FName AttachName);
+
+public:
+	UFUNCTION(BlueprintCallable)
+	E_WEAPON_TYPE GetWeaponType();
+
+	UFUNCTION(BlueprintCallable)
+	void SetNextAttack(bool NextAttack);
 
 protected:
 	// Called when the game starts or when spawned

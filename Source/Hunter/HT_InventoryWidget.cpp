@@ -73,8 +73,8 @@ void UHT_InventoryWidget::Init_Inventory()
 				int ItemNum = 0;
 				int ItemCnt = 0;
 
-				*FileReader << ItemNum;
-				*FileReader << ItemCnt;
+				*FileReader.Get() << ItemNum;
+				*FileReader.Get() << ItemCnt;
 
 				UE_LOG(LogClass, Warning, TEXT("ItemNum %d , Cnt %d"), ItemNum, ItemCnt);
 

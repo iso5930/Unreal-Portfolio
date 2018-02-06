@@ -11,6 +11,8 @@
 #include "HT_UserNameWidget.h"
 #include "ScrollBox.h"
 #include "HT_BaseWeapon.h"
+#include "HT_Weapon_Scythe.h"
+#include "HT_Weapon_DualBlade.h"
 
 // Sets default values
 AHT_BaseCharacter::AHT_BaseCharacter()
@@ -41,6 +43,8 @@ AHT_BaseCharacter::AHT_BaseCharacter()
 
 	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &AHT_BaseCharacter::OnOverlapBegin);
 	GetCapsuleComponent()->OnComponentEndOverlap.AddDynamic(this, &AHT_BaseCharacter::OnOverlapEnd);
+
+	PlayerState = E_PLAYER_STATE::PLAYER_STATE_IDLE;
 }
 
 void AHT_BaseCharacter::MoveForward(float Value)
@@ -90,6 +94,16 @@ void AHT_BaseCharacter::OnInventoryWidget()
 			GetWorld()->GetFirstPlayerController()->bShowMouseCursor = true;
 			GetWorld()->GetFirstPlayerController()->bEnableClickEvents = true;
 		}
+	}
+}
+
+void AHT_BaseCharacter::Attack()
+{
+	if (Weapon != NULL)
+	{
+		Weapon->Attack();
+
+		UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("°ø°Ý!!!"));
 	}
 }
 
@@ -184,12 +198,61 @@ void AHT_BaseCharacter::OnTestFunction()
 		OverlapNPC->NPCMenuWidgetPopup();
 	}*/
 
-	IsWeaponChange = true;
+	//IsWeaponChange = true;
 }
 
 FName AHT_BaseCharacter::GetWeaponAttachPointName() const
 {
 	return WeaponAttachPointName;
+}
+
+void AHT_BaseCharacter::WeaponChange(FItem_Info NewWeaponInfo)
+{
+	if (Weapon != NULL)
+	{
+		Weapon->Destroy();
+		Weapon = NULL;
+	}
+
+	FRotator SpawnRotation(0.0f, 0.0f, 0.0f);
+	FVector SpawnLocal(0.0f, 0.0f, 0.0f);
+
+	switch (NewWeaponInfo.Item_Type)
+	{
+		case E_ITEM_TYPE::ITEM_TYPE_WEAPON_SCYTHE:
+
+			Weapon = GetWorld()->SpawnActor<AHT_BaseWeapon>(AHT_Weapon_Scythe::StaticClass(), SpawnLocal, SpawnRotation);
+			Weapon->OwnerCharacter = this;
+			Weapon->SetWeaponIndex(NewWeaponInfo.Item_Num);
+			Weapon->SetWeaponType(E_WEAPON_TYPE::WEAPON_SCYTHE);
+			Weapon->AttachMeshToPawn(TEXT("Scythe_RH"));
+			
+			UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("³´ ÀåÂø"));
+
+			break;
+
+		case E_ITEM_TYPE::ITEM_TYPE_WEAPON_DUAL_BLADE:
+
+			Weapon = GetWorld()->SpawnActor<AHT_BaseWeapon>(AHT_Weapon_DualBlade::StaticClass(), SpawnLocal, SpawnRotation);
+			Weapon->OwnerCharacter = this;
+			Weapon->SetWeaponIndex(NewWeaponInfo.Item_Num);
+			Weapon->SetWeaponType(E_WEAPON_TYPE::WEAPON_DUAL_BLADE);
+			Weapon->AttachMeshToPawn(TEXT("DualBlade_RH"));
+
+			UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("µà¾ó ºí·¹ÀÌµå ÀåÂø"));
+			
+			break;
+	}	
+}
+
+void AHT_BaseCharacter::SetPlayerState(E_PLAYER_STATE NewPlayerState)
+{
+	PlayerState = NewPlayerState;
+}
+
+E_PLAYER_STATE AHT_BaseCharacter::GetPlayerState()
+{
+	return PlayerState;
 }
 
 void AHT_BaseCharacter::OnOverlapBegin(class UPrimitiveComponent* OverlappingComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -230,16 +293,6 @@ void AHT_BaseCharacter::BeginPlay()
 		UHT_GameInstance* GameInstance = Cast<UHT_GameInstance>(GetWorld()->GetGameInstance());
 		Widget->UserName = GameInstance->UserInfo.ID;
 	}
-
-	if (TestWeaponClass != NULL)
-	{
-		FRotator SpawnRotation(-3.0f, 35.0f, 271.0f);
-		FVector SpawnLocal(0.0f, 0.0f, 0.0f);
-
-		Weapon = GetWorld()->SpawnActor<AHT_BaseWeapon>(TestWeaponClass, SpawnLocal, SpawnRotation);
-		Weapon->OwnerCharacter = this;
-		Weapon->AttachMeshToPawn();
-	}
 }
 
 // Called every frame
@@ -274,5 +327,6 @@ void AHT_BaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 		PlayerInputComponent->BindAction("ItemTake", IE_Pressed, this, &AHT_BaseCharacter::Action_ItemTake);
 		PlayerInputComponent->BindAction("Enter", IE_Pressed, this, &AHT_BaseCharacter::OnInputTextWidget);
 		PlayerInputComponent->BindAction("Space", IE_Pressed, this, &AHT_BaseCharacter::OnTestFunction);
+		PlayerInputComponent->BindAction("Attack", IE_Pressed, this, &AHT_BaseCharacter::Attack);
 	}
 }

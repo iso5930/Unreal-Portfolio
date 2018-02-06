@@ -62,24 +62,27 @@ void UHT_CharacterCreateWidget::CreateCharacter(FString Name)
 				}
 
 				FItem_Info StartWeapon;
-
-				
+								
 				switch (StartWeaponType)
 				{
 				case E_WEAPON_TYPE::WEAPON_SCYTHE:
 
-					StartWeapon.Item_Num = 7;
+					StartWeapon.Item_Num = 6;
 
 					break;
 
 				case E_WEAPON_TYPE::WEAPON_DUAL_BLADE:
 
-					StartWeapon.Item_Num = 8;
+					StartWeapon.Item_Num = 7;
 
 					break;
 				}
 
 				Inventory[0] = StartWeapon;
+
+				StartWeapon.Item_Num = 6;
+
+				Inventory[1] = StartWeapon;
 
 				int InventorySize = Inventory.Num();
 
@@ -93,6 +96,8 @@ void UHT_CharacterCreateWidget::CreateCharacter(FString Name)
 					{
 						*ArWriter << Inventory[j].Item_Num;
 						*ArWriter << Inventory[j].Item_Cnt;
+
+						UE_LOG(LogClass, Warning, TEXT("ItemNum %d , Cnt %d"), Inventory[j].Item_Num, Inventory[j].Item_Cnt);
 					}
 
 					ArWriter->Close();

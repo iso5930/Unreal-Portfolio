@@ -73,8 +73,11 @@ public:
 
 public:
 	TArray<FCharacter_Info> CharacterData;
-
+	TArray<class USkeletalMesh*> WeaponMeshs;
 	int CharacterCurIndex;
+
+public:
+	UHT_GameInstance();
 
 public:
 	UPROPERTY(EditDefaultsOnly, Category = "Item")

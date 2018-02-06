@@ -1,14 +1,11 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Hunter.h"
-#include "HT_Weapon_Scythe.h"
+#include "HT_Weapon_DualBlade.h"
 
-AHT_Weapon_Scythe::AHT_Weapon_Scythe()
-	:Super()
+AHT_Weapon_DualBlade::AHT_Weapon_DualBlade()
 {
-	//Attack01_Montage
-
-	ConstructorHelpers::FObjectFinder<UAnimMontage> AnimMontage1(TEXT("/Game/Female/Animations/Montage/Female_Scythe_Attack01_Montage"));
+	ConstructorHelpers::FObjectFinder<UAnimMontage> AnimMontage1(TEXT("/Game/Female/Animations/Montage/Female_Double_Attack01_Montage"));
 
 	if (AnimMontage1.Object != NULL)
 	{
@@ -21,7 +18,7 @@ AHT_Weapon_Scythe::AHT_Weapon_Scythe()
 		UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("몽타주 불러오기 실패!"));
 	}
 
-	ConstructorHelpers::FObjectFinder<UAnimMontage> AnimMontage2(TEXT("/Game/Female/Animations/Montage/Female_Scythe_Attack02_Montage"));
+	ConstructorHelpers::FObjectFinder<UAnimMontage> AnimMontage2(TEXT("/Game/Female/Animations/Montage/Female_Double_Attack02_Montage"));
 
 	if (AnimMontage2.Object != NULL)
 	{
@@ -34,7 +31,7 @@ AHT_Weapon_Scythe::AHT_Weapon_Scythe()
 		UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("몽타주 불러오기 실패!"));
 	}
 
-	ConstructorHelpers::FObjectFinder<UAnimMontage> AnimMontage3(TEXT("/Game/Female/Animations/Montage/Female_Scythe_Attack03_Montage"));
+	ConstructorHelpers::FObjectFinder<UAnimMontage> AnimMontage3(TEXT("/Game/Female/Animations/Montage/Female_Double_Attack03_Montage"));
 
 	if (AnimMontage3.Object != NULL)
 	{
@@ -47,7 +44,7 @@ AHT_Weapon_Scythe::AHT_Weapon_Scythe()
 		UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("몽타주 불러오기 실패!"));
 	}
 
-	ConstructorHelpers::FObjectFinder<UAnimMontage> AnimMontage4(TEXT("/Game/Female/Animations/Montage/Female_Scythe_Attack04_Montage"));
+	ConstructorHelpers::FObjectFinder<UAnimMontage> AnimMontage4(TEXT("/Game/Female/Animations/Montage/Female_Double_Attack04_Montage"));
 
 	if (AnimMontage4.Object != NULL)
 	{
@@ -61,7 +58,7 @@ AHT_Weapon_Scythe::AHT_Weapon_Scythe()
 	}
 }
 
-void AHT_Weapon_Scythe::Attack()
+void AHT_Weapon_DualBlade::Attack()
 {
 	Super::Attack();
 }

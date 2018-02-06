@@ -9,6 +9,28 @@
 #include "Runtime/Core/Public/HAL/RunnableThread.h"
 #include "HT_LoginThread.h"
 
+UHT_GameInstance::UHT_GameInstance()
+{
+	TArray<TCHAR*> Paths;
+
+	Paths.Add(TEXT("/Game/Weapon/Scythe/Scythe"));
+	Paths.Add(TEXT("/Game/Weapon/Dual/Dual"));
+
+	for (int32 i = 0; i < Paths.Num(); ++i)
+	{
+		ConstructorHelpers::FObjectFinder<USkeletalMesh> WeaponMesh(Paths[i]);
+
+		if (WeaponMesh.Object != NULL)
+		{
+			WeaponMeshs.Add(WeaponMesh.Object);
+		}
+		else
+		{
+			UE_LOG(LogClass, Warning, TEXT("%d %s %s"), i, TEXT("Weapon Mesh Loading Error!"), Paths[i]);
+		}
+	}
+}
+
 void UHT_GameInstance::SetNetwork(bool IsCheck)
 {
 	IsNetwork = IsCheck;

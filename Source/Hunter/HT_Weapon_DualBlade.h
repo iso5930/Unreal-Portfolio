@@ -3,18 +3,18 @@
 #pragma once
 
 #include "HT_BaseWeapon.h"
-#include "HT_Weapon_Scythe.generated.h"
+#include "HT_Weapon_DualBlade.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class HUNTER_API AHT_Weapon_Scythe : public AHT_BaseWeapon
+class HUNTER_API AHT_Weapon_DualBlade : public AHT_BaseWeapon
 {
 	GENERATED_BODY()
 
 public:
-	AHT_Weapon_Scythe();
+	AHT_Weapon_DualBlade();
 
 public:
 	virtual void Attack() override;
