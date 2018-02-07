@@ -3,6 +3,7 @@
 #include "Hunter.h"
 #include "HT_BaseMonster.h"
 #include "HT_MonsterAIController.h"
+#include "Runtime/AIModule/Classes/Perception/PawnSensingComponent.h"
 
 // Sets default values
 AHT_BaseMonster::AHT_BaseMonster()
@@ -13,6 +14,28 @@ AHT_BaseMonster::AHT_BaseMonster()
 	bUseControllerRotationYaw = true;
 
 	AIControllerClass = AHT_MonsterAIController::StaticClass();
+
+	PawnSensing = CreateDefaultSubobject<UPawnSensingComponent>(TEXT("PawnSensing"));
+	PawnSensing->SensingInterval = 0.25f;
+
+	PawnSensing->OnSeePawn.AddDynamic(this, &AHT_BaseMonster::OnSeePlayer);
+
+	MonsterState = E_MONSTER_STATE::MONSTER_STATE_IDLE;
+}
+
+void AHT_BaseMonster::OnSeePlayer(APawn* InPawn)
+{
+	UE_LOG(LogClass, Warning, TEXT("%s %d"), TEXT("플레이어 감지!"));
+}
+
+E_MONSTER_STATE AHT_BaseMonster::GetMonsterState()
+{
+	return MonsterState;
+}
+
+void AHT_BaseMonster::SetMonsterState(E_MONSTER_STATE NewState)
+{
+	MonsterState = NewState;
 }
 
 void AHT_BaseMonster::FaceRotation(FRotator NewControlRotation, float DeltaTime /*= 0.f*/)

@@ -214,6 +214,12 @@ void AHT_BaseCharacter::WeaponChange(FItem_Info NewWeaponInfo)
 		Weapon = NULL;
 	}
 
+	if (SubWeapon != NULL)
+	{
+		SubWeapon->Destroy();
+		SubWeapon = NULL;
+	}
+
 	FRotator SpawnRotation(0.0f, 0.0f, 0.0f);
 	FVector SpawnLocal(0.0f, 0.0f, 0.0f);
 
@@ -238,6 +244,14 @@ void AHT_BaseCharacter::WeaponChange(FItem_Info NewWeaponInfo)
 			Weapon->SetWeaponIndex(NewWeaponInfo.Item_Num);
 			Weapon->SetWeaponType(E_WEAPON_TYPE::WEAPON_DUAL_BLADE);
 			Weapon->AttachMeshToPawn(TEXT("DualBlade_RH"));
+
+			SubWeapon = GetWorld()->SpawnActor<AHT_BaseWeapon>(AHT_Weapon_DualBlade::StaticClass(), SpawnLocal, SpawnRotation);
+			SubWeapon->OwnerCharacter = this;
+			SubWeapon->SetWeaponIndex(NewWeaponInfo.Item_Num);
+			SubWeapon->SetWeaponType(E_WEAPON_TYPE::WEAPON_DUAL_BLADE);
+			SubWeapon->AttachMeshToPawn(TEXT("DualBlade_LH"));
+
+			//충돌처리 할때 왼쪽 오른쪽 구분.
 
 			UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("듀얼 블레이드 장착"));
 			

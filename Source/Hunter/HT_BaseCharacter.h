@@ -50,6 +50,8 @@ public:
 
 	UPROPERTY(BlueprintReadWrite)
 	class AHT_BaseWeapon* Weapon;
+
+	class AHT_BaseWeapon* SubWeapon;
 	
 	UPROPERTY(BlueprintReadWrite)
 	bool IsWeaponChange = false;

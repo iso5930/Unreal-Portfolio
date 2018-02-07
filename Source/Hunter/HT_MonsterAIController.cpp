@@ -23,8 +23,6 @@ void AHT_MonsterAIController::FindTarget()
 {
 	APawn* pMonster = GetPawn();
 
-	UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("Find Target"));
-
 	if (pMonster != NULL)
 	{
 		const FVector Pos = pMonster->GetActorLocation();
@@ -64,29 +62,18 @@ void AHT_MonsterAIController::Possess(APawn* InPawn)
 
 	AHT_BaseMonster* pMonster = Cast<AHT_BaseMonster>(InPawn);
 
-	UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("Possess 65"));
-
 	if (pMonster != NULL)
 	{
 		if (pMonster->BotBehavior)
 		{
 			if (pMonster->BotBehavior->BlackboardAsset)
 			{
-				if (BlackboardComponent->InitializeBlackboard(*pMonster->BotBehavior->BlackboardAsset))
-				{
-					UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("초기화 성공"));
-				}
-				else
-				{
-					UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("초기화 실패"));
-				}
+				BlackboardComponent->InitializeBlackboard(*pMonster->BotBehavior->BlackboardAsset);
 			}
 
 			EnemyKeyID = BlackboardComponent->GetKeyID("Target");
 
 			BehaviorComponent->StartTree(*(pMonster->BotBehavior));
-
-			UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("Possess 82"));
 		}
 	}
 }
@@ -106,13 +93,9 @@ void AHT_MonsterAIController::UpdateControlRotation(float DeltaTime, bool bUpdat
 		Rotation.Yaw = FRotator::ClampAxis(Rotation.Yaw);
 		SetControlRotation(Rotation);
 
-		UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("UpDate Rot 11"));
-
 		if (pPawn && bUpdatePawn)
 		{
 			pPawn->FaceRotation(Rotation, DeltaTime);
-
-			UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("UpDate Rot 12"));
 		}
 	}
 }
