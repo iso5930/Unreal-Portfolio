@@ -202,7 +202,7 @@ FReply UHT_InventorySlotWidget::NativeOnMouseMove(const FGeometry& InGeometry, c
 				WidgetPos.X += 370;
 			}
 
-			UE_LOG(LogClass, Warning, TEXT("%f / %f"), WidgetPos.X, WidgetPos.Y);
+			//UE_LOG(LogClass, Warning, TEXT("%f / %f"), WidgetPos.X, WidgetPos.Y);
 
 			GameInstance->ItemToolTipWidget->SetVisibility(ESlateVisibility::Visible);
 			GameInstance->ItemToolTipWidget->RemoveFromParent();

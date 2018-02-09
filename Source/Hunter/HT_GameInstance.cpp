@@ -44,6 +44,11 @@ void UHT_GameInstance::SetNetwork(bool IsCheck)
 	}
 }
 
+bool UHT_GameInstance::GetNetwork()
+{
+	return IsNetwork;
+}
+
 void UHT_GameInstance::Init_Network(FString ID, FString PW)
 {
 	MemberInfo Info;

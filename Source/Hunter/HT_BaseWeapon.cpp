@@ -4,6 +4,7 @@
 #include "HT_BaseWeapon.h"
 #include "HT_BaseCharacter.h"
 #include "HT_GameInstance.h"
+#include "HT_BaseMonster.h"
 
 // Sets default values
 AHT_BaseWeapon::AHT_BaseWeapon()
@@ -13,6 +14,16 @@ AHT_BaseWeapon::AHT_BaseWeapon()
 
 	WeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("WeaponMesh"));
 	WeaponMesh->SetupAttachment(RootComponent);
+
+	WeaponCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("WeaponCollision"));
+	WeaponCollision->SetupAttachment(WeaponMesh);
+	WeaponCollision->SetActive(true);
+	WeaponCollision->bGenerateOverlapEvents = true;
+
+	WeaponCollision->OnComponentBeginOverlap.AddDynamic(this, &AHT_BaseWeapon::OnOverlapBegin);
+	//기본값 False
+
+	SetReplicates(true);
 }
 
 bool AHT_BaseWeapon::SetWeaponIndex(int32 Index)
@@ -71,8 +82,7 @@ void AHT_BaseWeapon::Attack()
 		{
 			OwnerCharacter->PlayAnimMontage(Attack01_Montage);
 		}
-
-
+		
 		UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("Attack 01"));
 	}
 	else if (PlayerState == E_PLAYER_STATE::PLAYER_STATE_ATTACK01 && IsNextAttack)
@@ -85,8 +95,7 @@ void AHT_BaseWeapon::Attack()
 		{
 			OwnerCharacter->PlayAnimMontage(Attack02_Montage);
 		}
-
-
+		
 		UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("Attack 02"));
 	}
 	else if (PlayerState == E_PLAYER_STATE::PLAYER_STATE_ATTACK02 && IsNextAttack)
@@ -114,6 +123,16 @@ void AHT_BaseWeapon::Attack()
 		}
 
 		UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("Attack 04"));
+	}
+}
+
+void AHT_BaseWeapon::OnOverlapBegin(class UPrimitiveComponent* OverlappingComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (OtherActor->IsA(AHT_BaseMonster::StaticClass()))
+	{
+		UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("무기 Apply Damege 호출"));
+
+		UGameplayStatics::ApplyDamage(OtherActor, 60.0f, NULL, this, UDamageType::StaticClass());		
 	}
 }
 

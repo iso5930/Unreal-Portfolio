@@ -27,6 +27,7 @@ public:
 	class UPawnSensingComponent* PawnSensing;
 
 public:
+	UPROPERTY(Replicated)
 	E_MONSTER_STATE MonsterState;
 
 public:
@@ -38,11 +39,16 @@ public:
 	void OnSeePlayer(APawn* InPawn);
 
 public:
+	UFUNCTION(BlueprintCallable)
 	E_MONSTER_STATE GetMonsterState();
+
+	UFUNCTION(BlueprintCallable)
 	void SetMonsterState(E_MONSTER_STATE NewState);
 
 public:
 	virtual void FaceRotation(FRotator NewControlRotation, float DeltaTime = 0.f) override;
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	virtual float TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
 protected:
 	// Called when the game starts or when spawned

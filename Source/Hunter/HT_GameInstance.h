@@ -87,6 +87,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "GameInstanceFunction")
 	void SetNetwork(bool IsCheck);
 
+	UFUNCTION(BlueprintCallable, Category = "GameInstanceFunction")
+	bool GetNetwork();
+
 public:
 	void Init_Network(FString ID, FString PW);
 

@@ -54,7 +54,11 @@ public:
 	class AHT_BaseWeapon* SubWeapon;
 	
 	UPROPERTY(BlueprintReadWrite)
-	bool IsWeaponChange = false;
+	bool IsWeaponChange = false; //무기 동기화때문에 사용함.
+
+	FString ChangeWeaponName;
+	FString ChangeSubWeaponName;
+	FItem_Info ChangeWeaponInfo;
 	
 public:
 	// Sets default values for this character's properties
@@ -93,11 +97,31 @@ public:
 	UFUNCTION()
 	void OnOverlapEnd(class UPrimitiveComponent* OverlappingComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
+	UFUNCTION(Server, Reliable, WithValidation)
+	void SpawnWeapon(FItem_Info NewWeaponInfo);
+
+	virtual void SpawnWeapon_Implementation(FItem_Info NewWeaponInfo);
+
+	bool SpawnWeapon_Validate(FItem_Info NewWeaponInfo);
+
+	/*UFUNCTION(Client, unreliable)
+	void SetWeaponName(const TCHAR _WeaponName, const TCHAR _SubWeaponName);
+
+	virtual void SetWeaponName_Implementation(const TCHAR _WeaponName, const TCHAR _SubWeaponName);*/
+
+	UFUNCTION(NetMulticast, Reliable)
+	void AttatchWeapon(FItem_Info WeaponInfo, const FString& SpawnWeaponName, const FString& SpawnSubWeaponName = FString());
+
+	virtual void AttatchWeapon_Implementation(FItem_Info WeaponInfo, const FString& SpawnWeaponName, const FString& SpawnSubWeaponName = FString());
+
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	
+public:
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 

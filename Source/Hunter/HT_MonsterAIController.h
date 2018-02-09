@@ -3,6 +3,7 @@
 #pragma once
 
 #include "AIController.h"
+#include "HT_BaseMonster.h"
 #include "HT_MonsterAIController.generated.h"
 
 /**
@@ -32,7 +33,16 @@ public:
 
 public:
 	UFUNCTION(BlueprintCallable, Category = Behavior)
-	void FindTarget();
+	void FindTarget(); //사용하지 않음.
+
+	UFUNCTION(BlueprintCallable, Category = Behavior)
+	void FindRandomPos();
+
+	UFUNCTION(BlueprintCallable, Category = Behavior)
+	bool TargetCheck();
+
+	UFUNCTION(BlueprintCallable, Category = Behavior)
+	void SetBlackBoardMonsterState(E_MONSTER_STATE NewState);
 
 public:
 	virtual void Possess(APawn* InPawn) override;

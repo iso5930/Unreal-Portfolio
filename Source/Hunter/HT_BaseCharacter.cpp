@@ -13,6 +13,7 @@
 #include "HT_BaseWeapon.h"
 #include "HT_Weapon_Scythe.h"
 #include "HT_Weapon_DualBlade.h"
+#include "UnrealNetwork.h"
 
 // Sets default values
 AHT_BaseCharacter::AHT_BaseCharacter()
@@ -102,8 +103,6 @@ void AHT_BaseCharacter::Attack()
 	if (Weapon != NULL)
 	{
 		Weapon->Attack();
-
-		UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("°ø°Ý!!!"));
 	}
 }
 
@@ -197,8 +196,6 @@ void AHT_BaseCharacter::OnTestFunction()
 	{
 		OverlapNPC->NPCMenuWidgetPopup();
 	}*/
-
-	//IsWeaponChange = true;
 }
 
 FName AHT_BaseCharacter::GetWeaponAttachPointName() const
@@ -208,55 +205,7 @@ FName AHT_BaseCharacter::GetWeaponAttachPointName() const
 
 void AHT_BaseCharacter::WeaponChange(FItem_Info NewWeaponInfo)
 {
-	if (Weapon != NULL)
-	{
-		Weapon->Destroy();
-		Weapon = NULL;
-	}
-
-	if (SubWeapon != NULL)
-	{
-		SubWeapon->Destroy();
-		SubWeapon = NULL;
-	}
-
-	FRotator SpawnRotation(0.0f, 0.0f, 0.0f);
-	FVector SpawnLocal(0.0f, 0.0f, 0.0f);
-
-	switch (NewWeaponInfo.Item_Type)
-	{
-		case E_ITEM_TYPE::ITEM_TYPE_WEAPON_SCYTHE:
-
-			Weapon = GetWorld()->SpawnActor<AHT_BaseWeapon>(AHT_Weapon_Scythe::StaticClass(), SpawnLocal, SpawnRotation);
-			Weapon->OwnerCharacter = this;
-			Weapon->SetWeaponIndex(NewWeaponInfo.Item_Num);
-			Weapon->SetWeaponType(E_WEAPON_TYPE::WEAPON_SCYTHE);
-			Weapon->AttachMeshToPawn(TEXT("Scythe_RH"));
-			
-			UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("³´ ÀåÂø"));
-
-			break;
-
-		case E_ITEM_TYPE::ITEM_TYPE_WEAPON_DUAL_BLADE:
-
-			Weapon = GetWorld()->SpawnActor<AHT_BaseWeapon>(AHT_Weapon_DualBlade::StaticClass(), SpawnLocal, SpawnRotation);
-			Weapon->OwnerCharacter = this;
-			Weapon->SetWeaponIndex(NewWeaponInfo.Item_Num);
-			Weapon->SetWeaponType(E_WEAPON_TYPE::WEAPON_DUAL_BLADE);
-			Weapon->AttachMeshToPawn(TEXT("DualBlade_RH"));
-
-			SubWeapon = GetWorld()->SpawnActor<AHT_BaseWeapon>(AHT_Weapon_DualBlade::StaticClass(), SpawnLocal, SpawnRotation);
-			SubWeapon->OwnerCharacter = this;
-			SubWeapon->SetWeaponIndex(NewWeaponInfo.Item_Num);
-			SubWeapon->SetWeaponType(E_WEAPON_TYPE::WEAPON_DUAL_BLADE);
-			SubWeapon->AttachMeshToPawn(TEXT("DualBlade_LH"));
-
-			//Ãæµ¹Ã³¸® ÇÒ¶§ ¿ÞÂÊ ¿À¸¥ÂÊ ±¸ºÐ.
-
-			UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("µà¾ó ºí·¹ÀÌµå ÀåÂø"));
-			
-			break;
-	}	
+	SpawnWeapon(NewWeaponInfo);
 }
 
 void AHT_BaseCharacter::SetPlayerState(E_PLAYER_STATE NewPlayerState)
@@ -275,7 +224,7 @@ void AHT_BaseCharacter::OnOverlapBegin(class UPrimitiveComponent* OverlappingCom
 	{
 		DropItemArr.Add((AHT_DropItem*)OtherActor);
 	}
-	else if (OtherActor->IsA(AHT_BaseNPC::StaticClass()))
+	else if (OtherActor->IsA(AHT_BaseNPC::StaticClass()) && GetWorld()->IsServer())
 	{
 		OverlapNPC = Cast<AHT_BaseNPC>(OtherActor);
 
@@ -295,6 +244,91 @@ void AHT_BaseCharacter::OnOverlapEnd(class UPrimitiveComponent* OverlappingComp,
 	}
 }
 
+void AHT_BaseCharacter::SpawnWeapon_Implementation(FItem_Info NewWeaponInfo)
+{
+	if (Weapon != NULL)
+	{
+		Weapon->Destroy();
+		Weapon = NULL;
+	}
+
+	if (SubWeapon != NULL)
+	{
+		SubWeapon->Destroy();
+		SubWeapon = NULL;
+	}
+
+	FRotator SpawnRotation(0.0f, 0.0f, 0.0f);
+	FVector SpawnLocal(0.0f, 0.0f, 0.0f);
+
+	AHT_BaseWeapon* pSpawnWeapon = NULL;
+	AHT_BaseWeapon* pSpawnSubWeapon = NULL;
+
+	switch (NewWeaponInfo.Item_Type)
+	{
+	case E_ITEM_TYPE::ITEM_TYPE_WEAPON_SCYTHE:
+
+		pSpawnWeapon = GetWorld()->SpawnActor<AHT_BaseWeapon>(AHT_Weapon_Scythe::StaticClass(), SpawnLocal, SpawnRotation);
+
+		AttatchWeapon(NewWeaponInfo, pSpawnWeapon->GetName());
+		
+		break;
+
+	case E_ITEM_TYPE::ITEM_TYPE_WEAPON_DUAL_BLADE:
+
+		pSpawnWeapon = GetWorld()->SpawnActor<AHT_BaseWeapon>(AHT_Weapon_DualBlade::StaticClass(), SpawnLocal, SpawnRotation);
+		pSpawnSubWeapon = GetWorld()->SpawnActor<AHT_BaseWeapon>(AHT_Weapon_DualBlade::StaticClass(), SpawnLocal, SpawnRotation);
+
+		AttatchWeapon(NewWeaponInfo, pSpawnWeapon->GetName(), pSpawnSubWeapon->GetName());
+		
+		break;
+	}
+}
+
+bool AHT_BaseCharacter::SpawnWeapon_Validate(FItem_Info NewWeaponInfo)
+{
+	return true;
+}
+
+void AHT_BaseCharacter::AttatchWeapon_Implementation(FItem_Info WeaponInfo, const FString& SpawnWeaponName, const FString& SpawnSubWeaponName /*= FString()*/)
+{
+	/*TArray<AActor*> WeaponList;
+
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AHT_BaseWeapon::StaticClass(), WeaponList);
+
+	switch (WeaponInfo.Item_Type)
+	{
+	case E_ITEM_TYPE::ITEM_TYPE_WEAPON_SCYTHE:
+
+		for (int i = 0; i < WeaponList.Num(); ++i)
+		{
+			AHT_BaseWeapon* pWeapon = Cast<AHT_BaseWeapon>(WeaponList[i]);
+
+			if (pWeapon != NULL)
+			{
+				if (SpawnWeaponName == pWeapon->GetName())
+				{
+					Weapon = pWeapon;
+					Weapon->OwnerCharacter = this;
+					Weapon->SetWeaponIndex(WeaponInfo.Item_Num);
+					Weapon->SetWeaponType(E_WEAPON_TYPE::WEAPON_SCYTHE);
+					Weapon->AttachMeshToPawn(TEXT("Scythe_RH"));
+
+					break;
+				}
+			}
+		}
+
+		break;
+	}*/
+
+	IsWeaponChange = true;
+
+	ChangeWeaponInfo = WeaponInfo;
+	ChangeWeaponName = SpawnWeaponName;
+	ChangeSubWeaponName = SpawnSubWeaponName;
+}
+
 // Called when the game starts or when spawned
 void AHT_BaseCharacter::BeginPlay()
 {
@@ -309,6 +343,11 @@ void AHT_BaseCharacter::BeginPlay()
 	}
 }
 
+void AHT_BaseCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+}
+
 // Called every frame
 void AHT_BaseCharacter::Tick(float DeltaTime)
 {
@@ -320,6 +359,49 @@ void AHT_BaseCharacter::Tick(float DeltaTime)
 
 		UScrollBox* ScrollBox = Cast<UScrollBox>(GameInstance->ChattingWidget->GetWidgetFromName("ChattingLogWidget"));
 		ScrollBox->ScrollToEnd();
+	}
+
+	if (IsWeaponChange)
+	{
+		Weapon = NULL;
+		SubWeapon = NULL;
+
+		TArray<AActor*> WeaponList;
+
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), AHT_BaseWeapon::StaticClass(), WeaponList);
+
+		switch (ChangeWeaponInfo.Item_Type)
+		{
+		case E_ITEM_TYPE::ITEM_TYPE_WEAPON_SCYTHE:
+
+			for (int i = 0; i < WeaponList.Num(); ++i)
+			{
+				AHT_BaseWeapon* pWeapon = Cast<AHT_BaseWeapon>(WeaponList[i]);
+
+				if (pWeapon != NULL)
+				{
+					if (ChangeWeaponName == pWeapon->GetName())
+					{
+						Weapon = pWeapon;
+						Weapon->OwnerCharacter = this;
+						Weapon->SetWeaponIndex(ChangeWeaponInfo.Item_Num);
+						Weapon->SetWeaponType(E_WEAPON_TYPE::WEAPON_SCYTHE);
+						Weapon->AttachMeshToPawn(TEXT("Scythe_RH"));
+
+
+						IsWeaponChange = false;
+						
+						ChangeWeaponInfo = FItem_Info();
+						ChangeWeaponName = FString();
+						ChangeSubWeaponName = FString();
+
+						break;
+					}
+				}
+			}
+
+			break;
+		}
 	}
 }
 

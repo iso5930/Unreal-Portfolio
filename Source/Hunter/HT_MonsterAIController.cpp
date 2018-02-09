@@ -7,7 +7,7 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "BehaviorTree/Tasks/BTTask_BlueprintBase.h"
 #include "BehaviorTree/Blackboard/BlackboardKeyAllTypes.h"
-#include "HT_BaseMonster.h"
+#include "AI/Navigation/NavigationSystem.h"
 #include "HT_BaseCharacter.h"
 
 void AHT_MonsterAIController::SetTarget(APawn* InTarget)
@@ -52,6 +52,61 @@ void AHT_MonsterAIController::FindTarget()
 		if (pBestTarget != NULL)
 		{
 			SetTarget(pBestTarget);
+		}
+	}
+}
+
+void AHT_MonsterAIController::FindRandomPos()
+{
+	APawn* pPawn = GetPawn();
+
+	if (pPawn != NULL)
+	{
+		BlackboardComponent->SetValueAsVector(TEXT("StartPos"), pPawn->GetActorLocation());
+
+		FVector EndPoint = UNavigationSystem::GetRandomPointInNavigableRadius(pPawn, pPawn->GetActorLocation(), 1000.f);
+
+		BlackboardComponent->SetValueAsVector(TEXT("EndPos"), EndPoint);
+	}
+}
+
+bool AHT_MonsterAIController::TargetCheck()
+{
+	if (BlackboardComponent != NULL)
+	{
+		UObject* pObj = BlackboardComponent->GetValue<UBlackboardKeyType_Object>(EnemyKeyID);
+
+		if (pObj != NULL)
+		{
+			return true;
+		}
+		else
+		{
+			SetBlackBoardMonsterState(E_MONSTER_STATE::MONSTER_STATE_IDLE);
+
+			return false;
+		}
+	}
+	else
+	{
+		SetBlackBoardMonsterState(E_MONSTER_STATE::MONSTER_STATE_IDLE);
+
+		return false;
+	}
+}
+
+void AHT_MonsterAIController::SetBlackBoardMonsterState(E_MONSTER_STATE NewState)
+{
+	APawn* pPawn = GetPawn();
+
+	if (pPawn != NULL)
+	{
+		AHT_BaseMonster* pMonster = Cast<AHT_BaseMonster>(pPawn);
+
+		if (pMonster != NULL)
+		{
+			pMonster->SetMonsterState(NewState);
+			BlackboardComponent->SetValueAsEnum(TEXT("MonsterState"), (uint8)NewState);
 		}
 	}
 }
