@@ -30,6 +30,8 @@ public:
 	UPROPERTY(Replicated)
 	E_MONSTER_STATE MonsterState;
 
+	float Health;
+
 public:
 	// Sets default values for this pawn's properties
 	AHT_BaseMonster();
@@ -49,6 +51,12 @@ public:
 	virtual void FaceRotation(FRotator NewControlRotation, float DeltaTime = 0.f) override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual float TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+
+public:
+	UFUNCTION(NetMulticast, Reliable)
+	void ClientTakeDamege(float NewHp);
+
+	void ClientTakeDamege_Implementation(float NewHp);
 
 protected:
 	// Called when the game starts or when spawned

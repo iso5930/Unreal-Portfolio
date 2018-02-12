@@ -34,8 +34,17 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Widget, meta = (AllowPrivateAccess = "true"))
 	class UWidgetComponent* UserNameWidget;
 
-	UPROPERTY(EditDefaultsOnly, Category = Weapon)
-	TSubclassOf<class AHT_BaseWeapon> TestWeaponClass;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Collision, meta = (AllowPrivateAccess = "true"))
+	UBoxComponent* AttackCollision_01;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Collision, meta = (AllowPrivateAccess = "true"))
+	UBoxComponent* AttackCollision_02;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Collision, meta = (AllowPrivateAccess = "true"))
+	UBoxComponent* AttackCollision_03;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Collision, meta = (AllowPrivateAccess = "true"))
+	UBoxComponent* AttackCollision_04;
 
 private:
 	TArray<class AHT_DropItem*> DropItemArr;
@@ -59,6 +68,7 @@ public:
 	FString ChangeWeaponName;
 	FString ChangeSubWeaponName;
 	FItem_Info ChangeWeaponInfo;
+	int PlayerNum;
 	
 public:
 	// Sets default values for this character's properties
@@ -90,12 +100,24 @@ public:
 	UFUNCTION(BlueprintCallable)
 	E_PLAYER_STATE GetPlayerState();
 
+	UFUNCTION(BlueprintCallable)
+	void AttackBegin();
+
+	UFUNCTION(BlueprintCallable)
+	void AttackEnd();
+
+	UFUNCTION(BlueprintCallable)
+	void ShowLog(FString Log);
+
 public:
 	UFUNCTION()
 	void OnOverlapBegin(class UPrimitiveComponent* OverlappingComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 	UFUNCTION()
 	void OnOverlapEnd(class UPrimitiveComponent* OverlappingComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
+	UFUNCTION(BlueprintCallable)
+	void OnWeaponAttackOverlap(class UPrimitiveComponent* OverlappingComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 	UFUNCTION(Server, Reliable, WithValidation)
 	void SpawnWeapon(FItem_Info NewWeaponInfo);
@@ -104,15 +126,17 @@ public:
 
 	bool SpawnWeapon_Validate(FItem_Info NewWeaponInfo);
 
-	/*UFUNCTION(Client, unreliable)
-	void SetWeaponName(const TCHAR _WeaponName, const TCHAR _SubWeaponName);
-
-	virtual void SetWeaponName_Implementation(const TCHAR _WeaponName, const TCHAR _SubWeaponName);*/
-
 	UFUNCTION(NetMulticast, Reliable)
 	void AttatchWeapon(FItem_Info WeaponInfo, const FString& SpawnWeaponName, const FString& SpawnSubWeaponName = FString());
 
 	virtual void AttatchWeapon_Implementation(FItem_Info WeaponInfo, const FString& SpawnWeaponName, const FString& SpawnSubWeaponName = FString());
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void BeginAttack();
+
+	virtual void BeginAttack_Implementation();
+
+	bool BeginAttack_Validate();
 
 
 protected:
@@ -120,7 +144,7 @@ protected:
 	virtual void BeginPlay() override;
 	
 public:
-	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	//virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

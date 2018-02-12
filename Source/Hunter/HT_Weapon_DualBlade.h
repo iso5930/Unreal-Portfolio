@@ -15,7 +15,4 @@ class HUNTER_API AHT_Weapon_DualBlade : public AHT_BaseWeapon
 
 public:
 	AHT_Weapon_DualBlade();
-
-public:
-	virtual void Attack() override;
 };

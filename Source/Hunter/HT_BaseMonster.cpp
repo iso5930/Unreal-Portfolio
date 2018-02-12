@@ -5,6 +5,8 @@
 #include "HT_MonsterAIController.h"
 #include "Runtime/AIModule/Classes/Perception/PawnSensingComponent.h"
 #include "UnrealNetwork.h"
+#include "HT_GameInstance.h"
+#include "HT_MonsterHpWidget.h"
 
 // Sets default values
 AHT_BaseMonster::AHT_BaseMonster()
@@ -22,6 +24,8 @@ AHT_BaseMonster::AHT_BaseMonster()
 	PawnSensing->OnSeePawn.AddDynamic(this, &AHT_BaseMonster::OnSeePlayer);
 
 	MonsterState = E_MONSTER_STATE::MONSTER_STATE_IDLE;
+
+	Health = 30000.0f;
 }
 
 void AHT_BaseMonster::OnSeePlayer(APawn* InPawn)
@@ -37,13 +41,13 @@ void AHT_BaseMonster::OnSeePlayer(APawn* InPawn)
 		}
 		else
 		{
-			UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("캐스팅 실패!"));
+			//UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("캐스팅 실패!"));
 		}
 
-		UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("플레이어 인식, 추적으로 상태 변환"));
+		//UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("플레이어 인식, 추적으로 상태 변환"));
 	}
 
-	UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("플레이어 인식"));
+	//UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("플레이어 인식"));
 }
 
 E_MONSTER_STATE AHT_BaseMonster::GetMonsterState()
@@ -72,9 +76,47 @@ void AHT_BaseMonster::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 
 float AHT_BaseMonster::TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("몬스터 Take Damege 호출"));
+	if (GetWorld()->IsServer())
+	{
+		Health = Health - Damage;
+
+		if (Health <= 0)
+		{
+			Health = 0;
+
+			SetMonsterState(E_MONSTER_STATE::MONSTER_STATE_DIE);
+
+			Destroy();
+		}
+
+		UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("서버 충돌 함수"));
+
+		ClientTakeDamege(Health);
+	}
 
 	return 0.0f;
+}
+
+void AHT_BaseMonster::ClientTakeDamege_Implementation(float NewHp)
+{
+	if (GetWorld()->IsClient())
+	{
+		if (NewHp <= 0)
+		{
+			SetMonsterState(E_MONSTER_STATE::MONSTER_STATE_DIE);
+		}
+
+		UE_LOG(LogClass, Warning, TEXT("%s %f"), TEXT("몬스터 남은 체력"), NewHp);
+
+		//소유중인 클라이언트에서 실행으로 나중에 바꾸기.
+
+		UHT_GameInstance* GameInst = Cast<UHT_GameInstance>(GetWorld()->GetGameInstance());
+
+		GameInst->MonsterHpWidget->SetVisibility(ESlateVisibility::Visible);
+		GameInst->MonsterHpWidget->MonsterTakeDamege(this, Health, NewHp, FString("Bear"), NULL);
+
+		Health = NewHp;
+	}
 }
 
 // Called when the game starts or when spawned

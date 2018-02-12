@@ -7,6 +7,22 @@
 #include "HT_DropItemWidget.h"
 #include "HT_StageWidget.h"
 #include "HT_EquipInventory_Widget.h"
+#include "HT_BaseCharacter.h"
+#include "HT_MonsterHpWidget.h"
+
+void AHT_StagePlayerController::SetPlayerNum_Implementation(int Num)
+{
+	/*PlayerNum = Num;
+
+	AHT_BaseCharacter* pOwner = Cast<AHT_BaseCharacter>(GetPawn());
+
+	if (pOwner != NULL)
+	{
+		pOwner->PlayerNum = PlayerNum;
+	}*/
+
+	//PlayerState
+}
 
 void AHT_StagePlayerController::BeginPlay()
 {
@@ -41,6 +57,8 @@ void AHT_StagePlayerController::BeginPlay()
 
 			GameInstance->EquipWidget = Cast<UHT_EquipInventory_Widget>(NewWidget->GetWidgetFromName("EquipInventoryWidget"));
 			//GameInstance->EquipWidget->SetVisibility(ESlateVisibility::Collapsed);
+
+			GameInstance->MonsterHpWidget = Cast<UHT_MonsterHpWidget>(NewWidget->GetWidgetFromName("MonsterHpWidget"));
 		}
 	}
 }

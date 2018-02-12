@@ -17,5 +17,15 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Widget")
 	TSubclassOf<class UUserWidget> StageWidget;
 
+private:
+	int PlayerNum;
+
+public:
+	UFUNCTION(NetMulticast, Reliable)
+	void SetPlayerNum(int Num);
+
+	void SetPlayerNum_Implementation(int Num);
+
+public:
 	virtual void BeginPlay() override;
 };

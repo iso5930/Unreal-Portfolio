@@ -60,12 +60,4 @@ AHT_Weapon_Scythe::AHT_Weapon_Scythe()
 	{
 		UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("몽타주 불러오기 실패!"));
 	}
-
-	WeaponCollision->SetWorldScale3D(FVector(0.1f, 1.0f, 1.0f));
-	WeaponCollision->SetWorldLocation(FVector(0.0f, -20.0f, 33.0f));
-}
-
-void AHT_Weapon_Scythe::Attack()
-{
-	Super::Attack();
 }

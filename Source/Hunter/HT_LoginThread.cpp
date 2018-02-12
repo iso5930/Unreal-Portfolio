@@ -34,7 +34,7 @@ uint32 FHT_LoginThread::Run()
 		{
 			GameInstance->ChattingSocket = ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM)->CreateSocket(NAME_Stream, TEXT("Chatting_Socket"), false);
 
-			FString address = TEXT("116.41.73.61");
+			FString address = TEXT("127.0.0.1");/*TEXT("116.41.73.61");*/
 			int32 port = 9000;
 			FIPv4Address IP;
 			FIPv4Address::Parse(address, IP);

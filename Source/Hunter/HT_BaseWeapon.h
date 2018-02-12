@@ -19,10 +19,7 @@ class HUNTER_API AHT_BaseWeapon : public AActor
 
 public:
 	UPROPERTY(VisibleDefaultsOnly)
-	USkeletalMeshComponent * WeaponMesh;
-
-	UPROPERTY(VisibleDefaultsOnly)
-	UBoxComponent* WeaponCollision;
+	USkeletalMeshComponent* WeaponMesh;
 
 public:
 	E_WEAPON_TYPE WeaponType;
@@ -37,6 +34,13 @@ protected:
 protected:
 	int32 WeaponIndex;
 	bool IsNextAttack;
+
+public:
+	UPROPERTY(Replicated)
+	int RealIndex; //서버 동기화 때문에..
+
+	UPROPERTY(Replicated)
+	int OwnerCharacterNum;
 	
 public:	
 	// Sets default values for this actor's properties
@@ -56,15 +60,21 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetNextAttack(bool NextAttack);
 
+public:
+	void FindOwenrCharacter(int OwnerNum);
+	
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 public:
-	virtual void Attack();
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-	UFUNCTION()
-	void OnOverlapBegin(class UPrimitiveComponent* OverlappingComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+public:
+	UFUNCTION(NetMulticast, Reliable)
+	void Attack();
+
+	virtual void Attack_Implementation();
 
 public:	
 	// Called every frame

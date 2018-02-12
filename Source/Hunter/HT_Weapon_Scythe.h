@@ -15,7 +15,4 @@ class HUNTER_API AHT_Weapon_Scythe : public AHT_BaseWeapon
 
 public:
 	AHT_Weapon_Scythe();
-
-public:
-	virtual void Attack() override;
 };

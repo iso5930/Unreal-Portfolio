@@ -14,11 +14,12 @@
 #include "HT_Weapon_Scythe.h"
 #include "HT_Weapon_DualBlade.h"
 #include "UnrealNetwork.h"
+#include "HT_BaseMonster.h"
 
 // Sets default values
 AHT_BaseCharacter::AHT_BaseCharacter()
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	bUseControllerRotationPitch = false;
@@ -42,10 +43,31 @@ AHT_BaseCharacter::AHT_BaseCharacter()
 	UserNameWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("UserNameWidget"));
 	UserNameWidget->SetupAttachment(RootComponent);
 
+	
 	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &AHT_BaseCharacter::OnOverlapBegin);
 	GetCapsuleComponent()->OnComponentEndOverlap.AddDynamic(this, &AHT_BaseCharacter::OnOverlapEnd);
 
 	PlayerState = E_PLAYER_STATE::PLAYER_STATE_IDLE;
+
+	AttackCollision_01 = CreateDefaultSubobject<UBoxComponent>(TEXT("AttackCollision_01"));
+	AttackCollision_01->SetupAttachment(GetMesh());
+	AttackCollision_01->SetActive(true);
+	AttackCollision_01->bGenerateOverlapEvents = true;
+
+	AttackCollision_02 = CreateDefaultSubobject<UBoxComponent>(TEXT("AttackCollision_02"));
+	AttackCollision_02->SetupAttachment(GetMesh());
+	AttackCollision_02->SetActive(true);
+	AttackCollision_02->bGenerateOverlapEvents = true;
+
+	AttackCollision_03 = CreateDefaultSubobject<UBoxComponent>(TEXT("AttackCollision_03"));
+	AttackCollision_03->SetupAttachment(GetMesh());
+	AttackCollision_03->SetActive(true);
+	AttackCollision_03->bGenerateOverlapEvents = true;
+
+	AttackCollision_04 = CreateDefaultSubobject<UBoxComponent>(TEXT("AttackCollision_04"));
+	AttackCollision_04->SetupAttachment(GetMesh());
+	AttackCollision_04->SetActive(true);
+	AttackCollision_04->bGenerateOverlapEvents = true;
 }
 
 void AHT_BaseCharacter::MoveForward(float Value)
@@ -102,7 +124,7 @@ void AHT_BaseCharacter::Attack()
 {
 	if (Weapon != NULL)
 	{
-		Weapon->Attack();
+		BeginAttack();
 	}
 }
 
@@ -218,6 +240,86 @@ E_PLAYER_STATE AHT_BaseCharacter::GetPlayerState()
 	return PlayerState;
 }
 
+void AHT_BaseCharacter::AttackBegin()
+{
+	UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("어택 비긴"));
+
+	if (GetWorld()->IsServer())
+	{
+		switch (PlayerState)
+		{
+		case E_PLAYER_STATE::PLAYER_STATE_ATTACK01:
+
+			AttackCollision_01->bGenerateOverlapEvents = true;
+			AttackCollision_02->bGenerateOverlapEvents = false;
+			AttackCollision_03->bGenerateOverlapEvents = false;
+			AttackCollision_04->bGenerateOverlapEvents = false;
+
+			break;
+
+		case E_PLAYER_STATE::PLAYER_STATE_ATTACK02:
+
+			AttackCollision_01->bGenerateOverlapEvents = false;
+			AttackCollision_02->bGenerateOverlapEvents = true;
+			AttackCollision_03->bGenerateOverlapEvents = false;
+			AttackCollision_04->bGenerateOverlapEvents = false;
+
+			break;
+
+		case E_PLAYER_STATE::PLAYER_STATE_ATTACK03:
+
+			AttackCollision_01->bGenerateOverlapEvents = false;
+			AttackCollision_02->bGenerateOverlapEvents = false;
+			AttackCollision_03->bGenerateOverlapEvents = true;
+			AttackCollision_04->bGenerateOverlapEvents = false;
+
+			break;
+
+		case E_PLAYER_STATE::PLAYER_STATE_ATTACK04:
+
+			AttackCollision_01->bGenerateOverlapEvents = false;
+			AttackCollision_02->bGenerateOverlapEvents = false;
+			AttackCollision_03->bGenerateOverlapEvents = false;
+			AttackCollision_04->bGenerateOverlapEvents = true;
+
+			break;
+		}
+	}
+	else
+	{
+		MoveForward(0.01f);
+	}
+}
+
+void AHT_BaseCharacter::AttackEnd()
+{
+	UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("어택 엔드"));
+
+	if (GetWorld()->IsServer())
+	{
+		AttackCollision_01->bGenerateOverlapEvents = false;
+		AttackCollision_02->bGenerateOverlapEvents = false;
+		AttackCollision_03->bGenerateOverlapEvents = false;
+		AttackCollision_04->bGenerateOverlapEvents = false;
+	}
+}	
+
+void AHT_BaseCharacter::ShowLog(FString Log)
+{
+	UE_LOG(LogClass, Warning, TEXT("%s"), *Log);
+}
+
+void AHT_BaseCharacter::OnWeaponAttackOverlap(class UPrimitiveComponent* OverlappingComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (GetWorld()->IsServer() && OtherActor->IsA(AHT_BaseMonster::StaticClass()))
+	{
+		UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("몬스터 충돌 피 깍임."));
+
+		UGameplayStatics::ApplyDamage(OtherActor, 60.0f, NULL, this, UDamageType::StaticClass());
+	}
+}
+
+
 void AHT_BaseCharacter::OnOverlapBegin(class UPrimitiveComponent* OverlappingComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	if (OtherActor->IsA(AHT_DropItem::StaticClass()))
@@ -264,14 +366,28 @@ void AHT_BaseCharacter::SpawnWeapon_Implementation(FItem_Info NewWeaponInfo)
 	AHT_BaseWeapon* pSpawnWeapon = NULL;
 	AHT_BaseWeapon* pSpawnSubWeapon = NULL;
 
+	UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("Spawn Weapon()"));
+
 	switch (NewWeaponInfo.Item_Type)
 	{
 	case E_ITEM_TYPE::ITEM_TYPE_WEAPON_SCYTHE:
 
 		pSpawnWeapon = GetWorld()->SpawnActor<AHT_BaseWeapon>(AHT_Weapon_Scythe::StaticClass(), SpawnLocal, SpawnRotation);
 
-		AttatchWeapon(NewWeaponInfo, pSpawnWeapon->GetName());
-		
+		AttatchWeapon(NewWeaponInfo, pSpawnWeapon->GetName()); //클라이언트 호출로 바꾸기.
+
+		if (GetWorld()->IsServer())
+		{
+			Weapon = pSpawnWeapon;
+			Weapon->OwnerCharacter = this;
+			Weapon->SetWeaponIndex(NewWeaponInfo.Item_Num);
+			Weapon->SetWeaponType(E_WEAPON_TYPE::WEAPON_SCYTHE);
+			Weapon->AttachMeshToPawn(TEXT("Scythe_RH"));
+			Weapon->OwnerCharacterNum = PlayerNum;
+
+			UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("Is Server"));
+		}
+			
 		break;
 
 	case E_ITEM_TYPE::ITEM_TYPE_WEAPON_DUAL_BLADE:
@@ -292,41 +408,21 @@ bool AHT_BaseCharacter::SpawnWeapon_Validate(FItem_Info NewWeaponInfo)
 
 void AHT_BaseCharacter::AttatchWeapon_Implementation(FItem_Info WeaponInfo, const FString& SpawnWeaponName, const FString& SpawnSubWeaponName /*= FString()*/)
 {
-	/*TArray<AActor*> WeaponList;
-
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AHT_BaseWeapon::StaticClass(), WeaponList);
-
-	switch (WeaponInfo.Item_Type)
-	{
-	case E_ITEM_TYPE::ITEM_TYPE_WEAPON_SCYTHE:
-
-		for (int i = 0; i < WeaponList.Num(); ++i)
-		{
-			AHT_BaseWeapon* pWeapon = Cast<AHT_BaseWeapon>(WeaponList[i]);
-
-			if (pWeapon != NULL)
-			{
-				if (SpawnWeaponName == pWeapon->GetName())
-				{
-					Weapon = pWeapon;
-					Weapon->OwnerCharacter = this;
-					Weapon->SetWeaponIndex(WeaponInfo.Item_Num);
-					Weapon->SetWeaponType(E_WEAPON_TYPE::WEAPON_SCYTHE);
-					Weapon->AttachMeshToPawn(TEXT("Scythe_RH"));
-
-					break;
-				}
-			}
-		}
-
-		break;
-	}*/
-
 	IsWeaponChange = true;
 
 	ChangeWeaponInfo = WeaponInfo;
 	ChangeWeaponName = SpawnWeaponName;
 	ChangeSubWeaponName = SpawnSubWeaponName;
+}
+
+void AHT_BaseCharacter::BeginAttack_Implementation()
+{
+	Weapon->Attack();
+}
+
+bool AHT_BaseCharacter::BeginAttack_Validate()
+{
+	return true;
 }
 
 // Called when the game starts or when spawned
@@ -342,11 +438,11 @@ void AHT_BaseCharacter::BeginPlay()
 		Widget->UserName = GameInstance->UserInfo.ID;
 	}
 }
-
-void AHT_BaseCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-}
+//
+//void AHT_BaseCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+//{
+//	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+//}
 
 // Called every frame
 void AHT_BaseCharacter::Tick(float DeltaTime)
@@ -387,8 +483,8 @@ void AHT_BaseCharacter::Tick(float DeltaTime)
 						Weapon->SetWeaponIndex(ChangeWeaponInfo.Item_Num);
 						Weapon->SetWeaponType(E_WEAPON_TYPE::WEAPON_SCYTHE);
 						Weapon->AttachMeshToPawn(TEXT("Scythe_RH"));
-
-
+						Weapon->OwnerCharacterNum = PlayerNum;
+						
 						IsWeaponChange = false;
 						
 						ChangeWeaponInfo = FItem_Info();

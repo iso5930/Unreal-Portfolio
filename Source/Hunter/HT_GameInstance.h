@@ -41,6 +41,8 @@ public:
 
 	class UHT_EquipInventory_Widget* EquipWidget;
 
+	class UHT_MonsterHpWidget* MonsterHpWidget;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "InventoryWidget")
 	TSubclassOf<class UUserWidget> InventorySlotDragWidget;
 
