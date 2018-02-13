@@ -61,7 +61,36 @@ FReply UHT_InventorySlotWidget::NativeOnMouseButtonDown(const FGeometry& InGeome
 			{
 				switch (SlotItem.Item_Type)
 				{
-				case E_ITEM_TYPE::ITEM_TYPE_EQUIP:
+				case E_ITEM_TYPE::ITEM_TYPE_EQUIP_UPPER:
+
+					InventoryWidget->InventoryData[SlotIndex] = GameInstance->EquipWidget->Equip_Data[(int)E_EQUIP_SLOT_TYPE::EQUIP_SLOT_UPPER];
+					GameInstance->EquipWidget->Equip_Data[(int)E_EQUIP_SLOT_TYPE::EQUIP_SLOT_UPPER] = TempItem;
+
+					Player->EquipChange(TempItem);
+
+					GameInstance->EquipWidget->ReflashSlot();
+
+					break;
+
+				case E_ITEM_TYPE::ITEM_TYPE_EQUIP_LOWER:
+
+					InventoryWidget->InventoryData[SlotIndex] = GameInstance->EquipWidget->Equip_Data[(int)E_EQUIP_SLOT_TYPE::EQUIP_SLOT_LOWER];
+					GameInstance->EquipWidget->Equip_Data[(int)E_EQUIP_SLOT_TYPE::EQUIP_SLOT_LOWER] = TempItem;
+
+					Player->EquipChange(TempItem);
+
+					GameInstance->EquipWidget->ReflashSlot();
+
+					break;
+
+				case E_ITEM_TYPE::ITEM_TYPE_EQUIP_FOOT:
+
+					InventoryWidget->InventoryData[SlotIndex] = GameInstance->EquipWidget->Equip_Data[(int)E_EQUIP_SLOT_TYPE::EQUIP_SLOT_FOOT];
+					GameInstance->EquipWidget->Equip_Data[(int)E_EQUIP_SLOT_TYPE::EQUIP_SLOT_FOOT] = TempItem;
+
+					Player->EquipChange(TempItem);
+
+					GameInstance->EquipWidget->ReflashSlot();
 
 					break;
 

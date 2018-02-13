@@ -78,11 +78,18 @@ void UHT_CharacterCreateWidget::CreateCharacter(FString Name)
 					break;
 				}
 
-				Inventory[0] = StartWeapon;
+				//Inventory[0] = StartWeapon;
+	
+				/*Inventory[0].Item_Num = 6;
+				Inventory[1].Item_Num = 7;
+				Inventory[2].Item_Num = 8;
+				Inventory[3].Item_Num = 9;
+				Inventory[4].Item_Num = 10;*/
 
-				StartWeapon.Item_Num = 6;
-
-				Inventory[1] = StartWeapon;
+				for (int j = 0; j < 17; ++j)
+				{
+					Inventory[j].Item_Num = j;
+				}
 
 				int InventorySize = Inventory.Num();
 

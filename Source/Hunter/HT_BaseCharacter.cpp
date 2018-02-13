@@ -52,22 +52,36 @@ AHT_BaseCharacter::AHT_BaseCharacter()
 	AttackCollision_01 = CreateDefaultSubobject<UBoxComponent>(TEXT("AttackCollision_01"));
 	AttackCollision_01->SetupAttachment(GetMesh());
 	AttackCollision_01->SetActive(true);
-	AttackCollision_01->bGenerateOverlapEvents = true;
+	AttackCollision_01->bGenerateOverlapEvents = false;
 
 	AttackCollision_02 = CreateDefaultSubobject<UBoxComponent>(TEXT("AttackCollision_02"));
 	AttackCollision_02->SetupAttachment(GetMesh());
 	AttackCollision_02->SetActive(true);
-	AttackCollision_02->bGenerateOverlapEvents = true;
+	AttackCollision_02->bGenerateOverlapEvents = false;
 
 	AttackCollision_03 = CreateDefaultSubobject<UBoxComponent>(TEXT("AttackCollision_03"));
 	AttackCollision_03->SetupAttachment(GetMesh());
 	AttackCollision_03->SetActive(true);
-	AttackCollision_03->bGenerateOverlapEvents = true;
+	AttackCollision_03->bGenerateOverlapEvents = false;
 
 	AttackCollision_04 = CreateDefaultSubobject<UBoxComponent>(TEXT("AttackCollision_04"));
 	AttackCollision_04->SetupAttachment(GetMesh());
 	AttackCollision_04->SetActive(true);
-	AttackCollision_04->bGenerateOverlapEvents = true;
+	AttackCollision_04->bGenerateOverlapEvents = false;
+
+	USkeletalMeshComponent* pMesh = GetMesh();
+
+	UpperMesh = CreateDefaultSubobject<USkeletalMeshComponent>("Upper_Mesh");
+	UpperMesh->SetupAttachment(pMesh);
+	UpperMesh->SetMasterPoseComponent(pMesh);
+
+	LowerMesh = CreateDefaultSubobject<USkeletalMeshComponent>("Lower_Mesh");
+	LowerMesh->SetupAttachment(pMesh);
+	LowerMesh->SetMasterPoseComponent(pMesh);
+
+	FootMesh = CreateDefaultSubobject<USkeletalMeshComponent>("Foot_Mesh");
+	FootMesh->SetupAttachment(pMesh);
+	FootMesh->SetMasterPoseComponent(pMesh);
 }
 
 void AHT_BaseCharacter::MoveForward(float Value)
@@ -96,6 +110,23 @@ void AHT_BaseCharacter::MoveRight(float Value)
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 		// add movement in that direction
 		AddMovementInput(Direction, Value);
+	}
+}
+
+void AHT_BaseCharacter::Zoom(float Value)
+{
+	if (Value != 0.0f)
+	{
+		CameraBoom->TargetArmLength -= Value;
+
+		if (CameraBoom->TargetArmLength <= 25.0f)
+		{
+			CameraBoom->TargetArmLength = 25.0f;
+		}
+		else if (CameraBoom->TargetArmLength >= 200.0f)
+		{
+			CameraBoom->TargetArmLength = 200.0f;
+		}
 	}
 }
 
@@ -228,6 +259,41 @@ FName AHT_BaseCharacter::GetWeaponAttachPointName() const
 void AHT_BaseCharacter::WeaponChange(FItem_Info NewWeaponInfo)
 {
 	SpawnWeapon(NewWeaponInfo);
+}
+
+void AHT_BaseCharacter::EquipChange(FItem_Info NewEquip)
+{
+	UHT_GameInstance* GameInstance = Cast<UHT_GameInstance>(GetWorld()->GetGameInstance());
+
+	if (GameInstance == NULL)
+		return;
+
+	switch (NewEquip.Item_Type)
+	{
+	case E_ITEM_TYPE::ITEM_TYPE_EQUIP_UPPER:
+
+		UpperMesh->SetSkeletalMesh(GameInstance->EquipMeshs[NewEquip.Item_Num - 8]);
+		
+		break;
+
+	case E_ITEM_TYPE::ITEM_TYPE_EQUIP_LOWER:
+
+		LowerMesh->SetSkeletalMesh(GameInstance->EquipMeshs[NewEquip.Item_Num - 11]);
+
+		break;
+
+	case E_ITEM_TYPE::ITEM_TYPE_EQUIP_FOOT:
+
+		FootMesh->SetSkeletalMesh(GameInstance->EquipMeshs[NewEquip.Item_Num - 14]);
+
+		break;
+	}
+
+	/*
+	
+	빈 아이템이 들어올 경우의 예외처리
+
+	*/
 }
 
 void AHT_BaseCharacter::SetPlayerState(E_PLAYER_STATE NewPlayerState)
@@ -514,6 +580,7 @@ void AHT_BaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 
 	if (GetWorld()->IsClient())
 	{
+		PlayerInputComponent->BindAxis("Zoom", this, &AHT_BaseCharacter::Zoom);
 		PlayerInputComponent->BindAction("Inventory", IE_Pressed, this, &AHT_BaseCharacter::OnInventoryWidget);
 		PlayerInputComponent->BindAction("NpcTalk", IE_Pressed, this, &AHT_BaseCharacter::Test);
 		PlayerInputComponent->BindAction("ItemTake", IE_Pressed, this, &AHT_BaseCharacter::Action_ItemTake);

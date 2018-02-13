@@ -47,7 +47,7 @@ void UHT_EquipInventory_Widget::Init_Equip()
 				
 				*FileReader << ItemNum;
 				
-				if (ItemNum != 0)
+				if (ItemNum != -1)
 				{
 					ItemInfo = GameInstance->Item_DataBase[ItemNum];
 				}

@@ -46,6 +46,15 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Collision, meta = (AllowPrivateAccess = "true"))
 	UBoxComponent* AttackCollision_04;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Clothing, meta = (AllowPrivateAccess = "true"))
+	USkeletalMeshComponent* UpperMesh;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Clothing, meta = (AllowPrivateAccess = "true"))
+	USkeletalMeshComponent* LowerMesh;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Clothing, meta = (AllowPrivateAccess = "true"))
+	USkeletalMeshComponent* FootMesh;
+
 private:
 	TArray<class AHT_DropItem*> DropItemArr;
 
@@ -77,6 +86,7 @@ public:
 public:
 	void MoveForward(float Value);
 	void MoveRight(float Value);
+	void Zoom(float Value);
 
 public:
 	void OnInventoryWidget();
@@ -92,6 +102,7 @@ public:
 public:
 	FName GetWeaponAttachPointName() const;
 	void WeaponChange(FItem_Info NewWeaponInfo);
+	void EquipChange(FItem_Info NewEquip);
 
 public:
 	UFUNCTION(BlueprintCallable)

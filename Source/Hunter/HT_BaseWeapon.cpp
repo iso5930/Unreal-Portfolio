@@ -26,7 +26,7 @@ bool AHT_BaseWeapon::SetWeaponIndex(int32 Index)
 {
 	RealIndex = Index;
 
-	WeaponIndex = Index - 7;
+	WeaponIndex = Index - 6;
 
 	UHT_GameInstance* GameInstance = Cast<UHT_GameInstance>(GetWorld()->GetGameInstance());
 

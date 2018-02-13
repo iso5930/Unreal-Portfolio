@@ -78,13 +78,13 @@ void UHT_InventoryWidget::Init_Inventory()
 
 				UE_LOG(LogClass, Warning, TEXT("ItemNum %d , Cnt %d"), ItemNum, ItemCnt);
 
-				if (ItemNum != 0)
+				if (ItemNum != -1)
 				{
 					ItemInfo = GameInstance->Item_DataBase[ItemNum];
 
 					ItemInfo.Item_Cnt = ItemCnt;
 				}
-
+				
 				InventoryData.Add(ItemInfo);
 			}
 

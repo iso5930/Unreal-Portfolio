@@ -76,6 +76,7 @@ public:
 public:
 	TArray<FCharacter_Info> CharacterData;
 	TArray<class USkeletalMesh*> WeaponMeshs;
+	TArray<class USkeletalMesh*> EquipMeshs;
 	int CharacterCurIndex;
 
 public:
