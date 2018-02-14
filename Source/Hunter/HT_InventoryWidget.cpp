@@ -5,6 +5,7 @@
 #include "HT_InventorySlotWidget.h"
 #include "HT_InventoryDragDropOperation.h"
 #include "HT_GameInstance.h"
+#include "HT_StagePlayerController.h"
 
 void UHT_InventoryWidget::ReflashSlot()
 {
@@ -24,14 +25,32 @@ void UHT_InventoryWidget::Init_Inventory()
 
 	UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("인벤토리 초기화"));
 
-	UHT_GameInstance* GameInstance = NULL;
+	UHT_GameInstance* GameInstance = Cast<UHT_GameInstance>(GetWorld()->GetGameInstance());
 
-	if (GetWorld() != NULL)
+	if (GameInstance != NULL)
 	{
-		GameInstance = Cast<UHT_GameInstance>(GetWorld()->GetGameInstance());
+		if (GameInstance->IsNetwork)
+		{
+			AHT_StagePlayerController* PlayerController = Cast<AHT_StagePlayerController>(GetWorld()->GetFirstPlayerController());
 
-		UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("인벤토리 1페"));
+			if (PlayerController != NULL)
+			{
+				FString CharacterName = GameInstance->CharacterData[GameInstance->CharacterCurIndex].Name;
+
+				//서버로 검사하는 함수 호출.
+				PlayerController->GetPlayerInventory(CharacterName);
+			}
+		}
+		else
+		{
+			LocalInventoryLoad();
+		}
 	}
+}
+
+void UHT_InventoryWidget::LocalInventoryLoad()
+{
+	UHT_GameInstance* GameInstance = Cast<UHT_GameInstance>(GetWorld()->GetGameInstance());
 
 	if (GameInstance != NULL)
 	{
@@ -97,7 +116,43 @@ void UHT_InventoryWidget::Init_Inventory()
 				InventoryData.Add(FItem_Info());
 			} //인벤토리 초기화 구문.
 		}
+
+		ReflashSlot();
 	}
+}
+
+void UHT_InventoryWidget::NetworkInventoryLoad(TArray<FItem_Info> InvenData)
+{
+	if (InvenData.Num() != 0)
+	{
+		UHT_GameInstance* GameInstance = Cast<UHT_GameInstance>(GetWorld()->GetGameInstance());
+
+		if (GameInstance != NULL)
+		{
+			for (int i = 0; i < InvenData.Num(); ++i)
+			{
+				FItem_Info ItemInfo;
+
+				if (InvenData[i].Item_Num != -1)
+				{
+					ItemInfo = GameInstance->Item_DataBase[InvenData[i].Item_Num];
+
+					ItemInfo.Item_Cnt = InvenData[i].Item_Cnt;
+				}
+
+				InventoryData.Add(ItemInfo);
+			}
+		}
+	}
+	else
+	{
+		for (int i = 0; i < 30; ++i)
+		{
+			InventoryData.Add(FItem_Info());
+		}
+	}
+
+	ReflashSlot();
 }
 
 void UHT_InventoryWidget::AddItem(FItem_Info NewItemInfo)

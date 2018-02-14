@@ -4,6 +4,7 @@
 
 #include "Blueprint/UserWidget.h"
 #include "HT_BaseWeapon.h"
+#include "HT_CharacterSlotWidget.h"
 #include "HT_CharacterCreateWidget.generated.h"
 
 /**
@@ -21,4 +22,6 @@ public:
 public:
 	UFUNCTION(BlueprintCallable)
 	void CreateCharacter(FString Name);
+
+	void LocalCharacterCreate(FCharacter_Info Info);
 };

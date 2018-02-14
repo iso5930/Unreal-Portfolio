@@ -23,6 +23,7 @@ class HUNTER_API UHT_GameInstance : public UGameInstance
 	GENERATED_BODY()
 
 public:
+	UPROPERTY(BlueprintReadWrite)
 	bool IsNetwork = false;
 
 public:

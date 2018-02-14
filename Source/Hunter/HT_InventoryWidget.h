@@ -34,6 +34,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void Init_Inventory();
 
+	void LocalInventoryLoad();
+	void NetworkInventoryLoad(TArray<FItem_Info> InvenData);
+
 public:
 	void AddItem(FItem_Info NewItemInfo);
 	void SetPos(FVector2D vPos);

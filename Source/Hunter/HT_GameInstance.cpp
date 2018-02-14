@@ -30,6 +30,8 @@ UHT_GameInstance::UHT_GameInstance()
 		}
 	}
 
+	UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("게임 인스턴스 생성"));
+
 	TArray<TCHAR*> EquipPaths;
 
 	EquipPaths.Add(TEXT("/Game/Female/Clothing/Upper/Mesh/Female_Hoodie_Upper"));

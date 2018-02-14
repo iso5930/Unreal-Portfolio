@@ -10,8 +10,8 @@ struct FCharacter_Info
 {
 	GENERATED_USTRUCT_BODY()
 
-		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CharacterInfo")
-		FString Name;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CharacterInfo")
+	FString Name;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CharacterInfo")
 	int Level;

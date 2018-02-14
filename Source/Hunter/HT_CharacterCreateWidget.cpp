@@ -6,6 +6,7 @@
 #include "HT_GameInstance.h"
 #include <ScrollBox.h>
 #include "HT_DropItem.h"
+#include "HT_LobbyPlayerController.h"
 
 void UHT_CharacterCreateWidget::CreateCharacter(FString Name)
 {
@@ -18,11 +19,45 @@ void UHT_CharacterCreateWidget::CreateCharacter(FString Name)
 
 	if (GameInstance != NULL)
 	{
+		if (GameInstance->IsNetwork)
+		{
+			/*
+
+			플레이어 컨트롤러에 Name를 보내서 중복인지 아닌지 판단하고, 중복이 아니라면
+
+			/USER ID/User.txt에 Name를 추가하고
+
+			/Character/Name.txt를 생성하고 인벤토리 정보를 저장.
+
+			*/
+
+			//우선 플레이어 컨트롤러를 가져오자.
+
+			AHT_LobbyPlayerController* PlayerController = Cast<AHT_LobbyPlayerController>(GetWorld()->GetFirstPlayerController());
+
+			if (PlayerController != NULL)
+			{
+				PlayerController->CharacterNameCheck(Name, StartWeaponType);
+			}
+		}
+		else
+		{
+			LocalCharacterCreate(Info);
+		}
+	}
+}
+
+void UHT_CharacterCreateWidget::LocalCharacterCreate(FCharacter_Info Info)
+{
+	UHT_GameInstance* GameInstance = Cast<UHT_GameInstance>(GetWorld()->GetGameInstance());
+
+	if (GameInstance != NULL)
+	{
 		/*
 		새로 생성된 캐릭터 데이터 삽입.
 		추후 서버에도 캐릭터 동기화.
 		*/
-
+		
 		GameInstance->CharacterData.Add(Info);
 
 		UScrollBox* ScrollBox = Cast<UScrollBox>(GameInstance->CharacterSelectWidget->GetWidgetFromName("CharacterSlotList"));
@@ -41,7 +76,7 @@ void UHT_CharacterCreateWidget::CreateCharacter(FString Name)
 				SlotWidget->SetSlot(Info);
 
 				/*
-				
+
 				캐릭 아이디.txt 넣는 순서.
 
 				FCharacter_Info
@@ -50,7 +85,7 @@ void UHT_CharacterCreateWidget::CreateCharacter(FString Name)
 
 				*/
 
-				FString FullPath = FString::Printf(TEXT("%s%s%s"), *FPaths::GameSavedDir(), *Name, TEXT(".txt"));
+				FString FullPath = FString::Printf(TEXT("%s%s%s"), *FPaths::GameSavedDir(), *Info.Name, TEXT(".txt"));
 
 				FArchive* ArWriter = IFileManager::Get().CreateFileWriter(*FullPath);
 
@@ -62,7 +97,7 @@ void UHT_CharacterCreateWidget::CreateCharacter(FString Name)
 				}
 
 				FItem_Info StartWeapon;
-								
+
 				switch (StartWeaponType)
 				{
 				case E_WEAPON_TYPE::WEAPON_SCYTHE:
@@ -79,7 +114,7 @@ void UHT_CharacterCreateWidget::CreateCharacter(FString Name)
 				}
 
 				//Inventory[0] = StartWeapon;
-	
+
 				/*Inventory[0].Item_Num = 6;
 				Inventory[1].Item_Num = 7;
 				Inventory[2].Item_Num = 8;
@@ -113,7 +148,7 @@ void UHT_CharacterCreateWidget::CreateCharacter(FString Name)
 
 					ArWriter = NULL;
 				}
-				
+
 				/*
 
 				//파일 읽기.
@@ -122,22 +157,22 @@ void UHT_CharacterCreateWidget::CreateCharacter(FString Name)
 
 				if (FileReader.IsValid())
 				{
-					FCharacter_Info NewInfo;
+				FCharacter_Info NewInfo;
 
-					*FileReader.Get() << NewInfo.Name;
-					*FileReader.Get() << NewInfo.Level;
+				*FileReader.Get() << NewInfo.Name;
+				*FileReader.Get() << NewInfo.Level;
 
-					UE_LOG(LogClass, Warning, TEXT("Name %s , Level %d"), *NewInfo.Name, NewInfo.Level);
+				UE_LOG(LogClass, Warning, TEXT("Name %s , Level %d"), *NewInfo.Name, NewInfo.Level);
 
-					*FileReader.Get() << InventorySize;
+				*FileReader.Get() << InventorySize;
 
-					for (int j = 0; j < InventorySize; ++j)
-					{
-						*FileReader << Inventory[j].Item_Num;
-						*FileReader << Inventory[j].Item_Cnt;
-					}
+				for (int j = 0; j < InventorySize; ++j)
+				{
+				*FileReader << Inventory[j].Item_Num;
+				*FileReader << Inventory[j].Item_Cnt;
+				}
 
-					FileReader->Close();
+				FileReader->Close();
 				}
 
 				*/
