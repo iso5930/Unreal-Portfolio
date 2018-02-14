@@ -15,6 +15,8 @@
 #include "HT_Weapon_DualBlade.h"
 #include "UnrealNetwork.h"
 #include "HT_BaseMonster.h"
+#include "HT_PlayerStateWidget.h"
+#include "HT_StagePlayerState.h"
 
 // Sets default values
 AHT_BaseCharacter::AHT_BaseCharacter()
@@ -47,7 +49,7 @@ AHT_BaseCharacter::AHT_BaseCharacter()
 	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &AHT_BaseCharacter::OnOverlapBegin);
 	GetCapsuleComponent()->OnComponentEndOverlap.AddDynamic(this, &AHT_BaseCharacter::OnOverlapEnd);
 
-	PlayerState = E_PLAYER_STATE::PLAYER_STATE_IDLE;
+	CurPlayerState = E_PLAYER_STATE::PLAYER_STATE_IDLE;
 
 	AttackCollision_01 = CreateDefaultSubobject<UBoxComponent>(TEXT("AttackCollision_01"));
 	AttackCollision_01->SetupAttachment(GetMesh());
@@ -82,6 +84,9 @@ AHT_BaseCharacter::AHT_BaseCharacter()
 	FootMesh = CreateDefaultSubobject<USkeletalMeshComponent>("Foot_Mesh");
 	FootMesh->SetupAttachment(pMesh);
 	FootMesh->SetMasterPoseComponent(pMesh);
+
+	MaxHealth = 600.0f;
+	Health = 600.0f;
 }
 
 void AHT_BaseCharacter::MoveForward(float Value)
@@ -288,22 +293,16 @@ void AHT_BaseCharacter::EquipChange(FItem_Info NewEquip)
 
 		break;
 	}
-
-	/*
-	
-	빈 아이템이 들어올 경우의 예외처리
-
-	*/
 }
 
 void AHT_BaseCharacter::SetPlayerState(E_PLAYER_STATE NewPlayerState)
 {
-	PlayerState = NewPlayerState;
+	CurPlayerState = NewPlayerState;
 }
 
-E_PLAYER_STATE AHT_BaseCharacter::GetPlayerState()
+E_PLAYER_STATE AHT_BaseCharacter::GetCurPlayerState()
 {
-	return PlayerState;
+	return CurPlayerState;
 }
 
 void AHT_BaseCharacter::AttackBegin()
@@ -312,7 +311,7 @@ void AHT_BaseCharacter::AttackBegin()
 
 	if (GetWorld()->IsServer())
 	{
-		switch (PlayerState)
+		switch (CurPlayerState)
 		{
 		case E_PLAYER_STATE::PLAYER_STATE_ATTACK01:
 
@@ -384,7 +383,6 @@ void AHT_BaseCharacter::OnWeaponAttackOverlap(class UPrimitiveComponent* Overlap
 		UGameplayStatics::ApplyDamage(OtherActor, 60.0f, NULL, this, UDamageType::StaticClass());
 	}
 }
-
 
 void AHT_BaseCharacter::OnOverlapBegin(class UPrimitiveComponent* OverlappingComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
@@ -491,6 +489,65 @@ bool AHT_BaseCharacter::BeginAttack_Validate()
 	return true;
 }
 
+void AHT_BaseCharacter::PointDamage(float Damage)
+{
+	/*
+	
+	서버에서 깍아주는 PointDamage;
+
+	*/
+
+	Health -= Damage;
+
+	if (Health <= 0.0f)
+	{
+		Health = 0.0f;
+	}
+
+	ClientPointDamege(Health);
+
+	UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("서버 플레이어 포인트 데미지 함수 호출"));
+
+	/*
+	
+	피격 몽타주, 죽음 몽타주.
+	
+	*/
+}
+
+void AHT_BaseCharacter::ClientPointDamege_Implementation(float NewHealth)
+{
+	Health = NewHealth;
+	
+	/*
+
+	피격 몽타주, 죽음 몽타주.
+
+	*/
+
+	UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("클라이언트 플레이어 포인트 데미지 함수 호출"));
+}
+
+void AHT_BaseCharacter::DestroyWeapon_Implementation()
+{
+	if (Weapon != NULL)
+	{
+		Weapon->Destroy();
+		Weapon = NULL;
+
+		UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("무기를 지웠다!"));
+	}
+	else
+	{
+		UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("무기를 못 지웠다!"));
+	}
+}
+
+bool AHT_BaseCharacter::DestroyWeapon_Validate()
+{
+	return true;
+}
+
 // Called when the game starts or when spawned
 void AHT_BaseCharacter::BeginPlay()
 {
@@ -501,7 +558,28 @@ void AHT_BaseCharacter::BeginPlay()
 	if (Widget != NULL)
 	{
 		UHT_GameInstance* GameInstance = Cast<UHT_GameInstance>(GetWorld()->GetGameInstance());
-		Widget->UserName = GameInstance->UserInfo.ID;
+		Widget->UserName = TEXT("진서연")/*GameInstance->UserInfo.ID*/;
+	}
+
+	if (GetWorld()->IsClient()) //소유중인 클라이언트에서만 실행.
+	{
+		UHT_GameInstance* GameInstance = Cast<UHT_GameInstance>(GetWorld()->GetGameInstance());
+		
+		if (GameInstance != NULL)
+		{
+			AHT_StagePlayerState* StagePlayerStage = Cast<AHT_StagePlayerState>(PlayerState);
+
+			if (StagePlayerStage != NULL)
+			{
+				if (StagePlayerStage->ClientPlayerNum == GameInstance->PlayerNum)
+				{
+					GameInstance->PlayerStateWidget->SetOwnerPlayer(this);
+
+					UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("UI 설정 !!"));
+
+				}
+			}			
+		}
 	}
 }
 //
@@ -522,7 +600,7 @@ void AHT_BaseCharacter::Tick(float DeltaTime)
 		UScrollBox* ScrollBox = Cast<UScrollBox>(GameInstance->ChattingWidget->GetWidgetFromName("ChattingLogWidget"));
 		ScrollBox->ScrollToEnd();
 	}
-
+			
 	if (IsWeaponChange)
 	{
 		Weapon = NULL;

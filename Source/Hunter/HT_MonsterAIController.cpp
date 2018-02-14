@@ -111,6 +111,21 @@ void AHT_MonsterAIController::SetBlackBoardMonsterState(E_MONSTER_STATE NewState
 	}
 }
 
+void AHT_MonsterAIController::MonsterAttack01()
+{
+	AHT_BaseMonster* pMonster = Cast<AHT_BaseMonster>(GetPawn());
+
+	if (pMonster != NULL)
+	{
+		pMonster->MonsterAttack();
+	}
+}
+
+E_MONSTER_STATE AHT_MonsterAIController::GetBlackBoardMonsterState()
+{
+	return (E_MONSTER_STATE)BlackboardComponent->GetValueAsEnum(TEXT("MonsterState"));
+}
+
 void AHT_MonsterAIController::Possess(APawn* InPawn)
 {
 	Super::Possess(InPawn);

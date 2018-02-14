@@ -59,6 +59,24 @@ void AHT_StagePlayerController::BeginPlay()
 			//GameInstance->EquipWidget->SetVisibility(ESlateVisibility::Collapsed);
 
 			GameInstance->MonsterHpWidget = Cast<UHT_MonsterHpWidget>(NewWidget->GetWidgetFromName("MonsterHpWidget"));
+
+			GameInstance->PlayerStateWidget = Cast<UHT_PlayerStateWidget>(NewWidget->GetWidgetFromName("PlayerStateWidget"));
 		}
+	}
+}
+
+void AHT_StagePlayerController::UnPossess()
+{
+	if (GetPawn() != NULL)
+	{
+		UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("Pawn 있음"));
+
+		AHT_BaseCharacter* pPlayer = Cast<AHT_BaseCharacter>(GetPawn());
+
+		pPlayer->DestroyWeapon();
+	}
+	else
+	{
+		UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("Pawn 없음"));
 	}
 }

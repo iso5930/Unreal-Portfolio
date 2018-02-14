@@ -12,7 +12,7 @@
 AHT_BaseMonster::AHT_BaseMonster()
 {
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;//false;
 
 	bUseControllerRotationYaw = true;
 
@@ -25,7 +25,20 @@ AHT_BaseMonster::AHT_BaseMonster()
 
 	MonsterState = E_MONSTER_STATE::MONSTER_STATE_IDLE;
 
-	Health = 30000.0f;
+	Health = 600.0f;
+
+	DeathTime = 0.0f;
+
+	ConstructorHelpers::FObjectFinder<UAnimMontage> AnimMontage1(TEXT("/Game/Monster/Bear/Animations/Montage/Bear_MeleeAttack"));
+
+	if (AnimMontage1.Object != NULL)
+	{
+		Attack_Montage = AnimMontage1.Object;
+
+		UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("베어 불러오기 성공"));
+	}
+
+	//Bear_MeleeAttack
 }
 
 void AHT_BaseMonster::OnSeePlayer(APawn* InPawn)
@@ -39,15 +52,7 @@ void AHT_BaseMonster::OnSeePlayer(APawn* InPawn)
 			AIController->SetBlackBoardMonsterState(E_MONSTER_STATE::MONSTER_STATE_CHASE);
 			AIController->SetTarget(InPawn);
 		}
-		else
-		{
-			//UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("캐스팅 실패!"));
-		}
-
-		//UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("플레이어 인식, 추적으로 상태 변환"));
 	}
-
-	//UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("플레이어 인식"));
 }
 
 E_MONSTER_STATE AHT_BaseMonster::GetMonsterState()
@@ -84,9 +89,15 @@ float AHT_BaseMonster::TakeDamage(float Damage, struct FDamageEvent const& Damag
 		{
 			Health = 0;
 
-			SetMonsterState(E_MONSTER_STATE::MONSTER_STATE_DIE);
+			AHT_MonsterAIController* AIController = Cast<AHT_MonsterAIController>(GetController());
 
-			Destroy();
+			if (AIController != NULL)
+			{
+				AIController->SetBlackBoardMonsterState(E_MONSTER_STATE::MONSTER_STATE_DIE);
+				AIController->SetTarget(NULL);
+			}
+
+			//Destroy();
 		}
 
 		UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("서버 충돌 함수"));
@@ -103,7 +114,13 @@ void AHT_BaseMonster::ClientTakeDamege_Implementation(float NewHp)
 	{
 		if (NewHp <= 0)
 		{
-			SetMonsterState(E_MONSTER_STATE::MONSTER_STATE_DIE);
+			AHT_MonsterAIController* AIController = Cast<AHT_MonsterAIController>(GetController());
+
+			if (AIController != NULL)
+			{
+				AIController->SetBlackBoardMonsterState(E_MONSTER_STATE::MONSTER_STATE_DIE);
+				AIController->SetTarget(NULL);
+			}
 		}
 
 		UE_LOG(LogClass, Warning, TEXT("%s %f"), TEXT("몬스터 남은 체력"), NewHp);
@@ -119,6 +136,14 @@ void AHT_BaseMonster::ClientTakeDamege_Implementation(float NewHp)
 	}
 }
 
+void AHT_BaseMonster::MonsterAttack_Implementation()
+{
+	if (Attack_Montage != NULL)
+	{
+		PlayAnimMontage(Attack_Montage);
+	}
+}
+
 // Called when the game starts or when spawned
 void AHT_BaseMonster::BeginPlay()
 {
@@ -129,4 +154,18 @@ void AHT_BaseMonster::BeginPlay()
 void AHT_BaseMonster::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	if (GetWorld()->IsServer() && MonsterState == E_MONSTER_STATE::MONSTER_STATE_DIE)
+	{
+		DeathTime += DeltaTime;
+
+		/*
+		
+		//나중에 Alpha로 서서히 사라지도록..
+
+		*/
+
+		if (DeathTime >= 5.0f)
+			Destroy();
+	}
 }

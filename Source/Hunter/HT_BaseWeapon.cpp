@@ -98,7 +98,7 @@ void AHT_BaseWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 
 void AHT_BaseWeapon::Attack_Implementation()
 {
-	E_PLAYER_STATE PlayerState = OwnerCharacter->GetPlayerState();
+	E_PLAYER_STATE PlayerState = OwnerCharacter->GetCurPlayerState();
 
 	if (PlayerState == E_PLAYER_STATE::PLAYER_STATE_IDLE)
 	{

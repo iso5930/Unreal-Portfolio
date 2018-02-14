@@ -43,6 +43,8 @@ public:
 
 	class UHT_MonsterHpWidget* MonsterHpWidget;
 
+	class UHT_PlayerStateWidget* PlayerStateWidget;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "InventoryWidget")
 	TSubclassOf<class UUserWidget> InventorySlotDragWidget;
 
@@ -73,12 +75,18 @@ public:
 public:
 	MemberInfo UserInfo;
 
+	int PlayerNum;
+
 public:
+	UPROPERTY(BlueprintReadWrite)
 	TArray<FCharacter_Info> CharacterData;
-	TArray<class USkeletalMesh*> WeaponMeshs;
-	TArray<class USkeletalMesh*> EquipMeshs;
+
+	UPROPERTY(BlueprintReadWrite)
 	int CharacterCurIndex;
 
+	TArray<class USkeletalMesh*> WeaponMeshs;
+	TArray<class USkeletalMesh*> EquipMeshs;
+	
 public:
 	UHT_GameInstance();
 

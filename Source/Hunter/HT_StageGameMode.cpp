@@ -4,6 +4,7 @@
 #include "HT_StageGameMode.h"
 #include "HT_StagePlayerController.h"
 #include "HT_StagePlayerState.h"
+#include "HT_BaseCharacter.h"
 
 void AHT_StageGameMode::PostLogin(APlayerController* NewPlayer)
 {

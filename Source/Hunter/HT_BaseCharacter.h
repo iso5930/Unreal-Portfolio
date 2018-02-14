@@ -60,7 +60,7 @@ private:
 
 	class AHT_BaseNPC* OverlapNPC;
 
-	E_PLAYER_STATE PlayerState;
+	E_PLAYER_STATE CurPlayerState;
 
 public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Weapon)
@@ -68,6 +68,9 @@ public:
 
 	UPROPERTY(BlueprintReadWrite)
 	class AHT_BaseWeapon* Weapon;
+
+	float Health;
+	float MaxHealth;
 
 	class AHT_BaseWeapon* SubWeapon;
 	
@@ -77,7 +80,7 @@ public:
 	FString ChangeWeaponName;
 	FString ChangeSubWeaponName;
 	FItem_Info ChangeWeaponInfo;
-	int PlayerNum;
+	int PlayerNum = -1;
 	
 public:
 	// Sets default values for this character's properties
@@ -109,7 +112,7 @@ public:
 	void SetPlayerState(E_PLAYER_STATE NewPlayerState);
 
 	UFUNCTION(BlueprintCallable)
-	E_PLAYER_STATE GetPlayerState();
+	E_PLAYER_STATE GetCurPlayerState();
 
 	UFUNCTION(BlueprintCallable)
 	void AttackBegin();
@@ -137,7 +140,7 @@ public:
 
 	bool SpawnWeapon_Validate(FItem_Info NewWeaponInfo);
 
-	UFUNCTION(NetMulticast, Reliable)
+	UFUNCTION(Client, Reliable)
 	void AttatchWeapon(FItem_Info WeaponInfo, const FString& SpawnWeaponName, const FString& SpawnSubWeaponName = FString());
 
 	virtual void AttatchWeapon_Implementation(FItem_Info WeaponInfo, const FString& SpawnWeaponName, const FString& SpawnSubWeaponName = FString());
@@ -149,7 +152,21 @@ public:
 
 	bool BeginAttack_Validate();
 
+	UFUNCTION(BlueprintCallable)
+	void PointDamage(float Damage);
 
+	UFUNCTION(Client, Reliable)
+	void ClientPointDamege(float NewHealth);
+
+	virtual void ClientPointDamege_Implementation(float NewHealth);
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void DestroyWeapon();
+
+	virtual void DestroyWeapon_Implementation();
+
+	bool DestroyWeapon_Validate();
+	
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

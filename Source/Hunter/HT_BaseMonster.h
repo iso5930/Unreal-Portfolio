@@ -26,11 +26,15 @@ public:
 	UPROPERTY(VisibleAnywhere, Category = PawnSensing)
 	class UPawnSensingComponent* PawnSensing;
 
+	UAnimMontage* Attack_Montage;
+
 public:
 	UPROPERTY(Replicated)
 	E_MONSTER_STATE MonsterState;
 
 	float Health;
+
+	float DeathTime;
 
 public:
 	// Sets default values for this pawn's properties
@@ -57,6 +61,11 @@ public:
 	void ClientTakeDamege(float NewHp);
 
 	void ClientTakeDamege_Implementation(float NewHp);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MonsterAttack();
+
+	void MonsterAttack_Implementation();
 
 protected:
 	// Called when the game starts or when spawned

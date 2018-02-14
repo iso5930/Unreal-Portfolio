@@ -44,6 +44,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = Behavior)
 	void SetBlackBoardMonsterState(E_MONSTER_STATE NewState);
 
+	UFUNCTION(BlueprintCallable, Category = Behavior)
+	void MonsterAttack01();
+
+	E_MONSTER_STATE GetBlackBoardMonsterState();
+
 public:
 	virtual void Possess(APawn* InPawn) override;
 	virtual void UpdateControlRotation(float DeltaTime, bool bUpdatePawn = true) override;

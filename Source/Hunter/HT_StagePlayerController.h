@@ -28,4 +28,5 @@ public:
 
 public:
 	virtual void BeginPlay() override;
+	virtual void UnPossess() override;
 };
