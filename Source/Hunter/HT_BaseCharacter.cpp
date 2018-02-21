@@ -17,6 +17,9 @@
 #include "HT_BaseMonster.h"
 #include "HT_PlayerStateWidget.h"
 #include "HT_StagePlayerState.h"
+#include "HT_EquipInventory_Widget.h"
+#include "HT_TakeItemWidget.h"
+#include "HT_StageWidget.h"
 
 // Sets default values
 AHT_BaseCharacter::AHT_BaseCharacter()
@@ -41,10 +44,6 @@ AHT_BaseCharacter::AHT_BaseCharacter()
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	FollowCamera->bUsePawnControlRotation = false;
-
-	UserNameWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("UserNameWidget"));
-	UserNameWidget->SetupAttachment(RootComponent);
-
 	
 	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &AHT_BaseCharacter::OnOverlapBegin);
 	GetCapsuleComponent()->OnComponentEndOverlap.AddDynamic(this, &AHT_BaseCharacter::OnOverlapEnd);
@@ -87,6 +86,15 @@ AHT_BaseCharacter::AHT_BaseCharacter()
 
 	MaxHealth = 600.0f;
 	Health = 600.0f;
+
+	MaxMana = 200.0f;
+	Mana = 200.0f;
+
+	/*
+	
+	*/
+
+		
 }
 
 void AHT_BaseCharacter::MoveForward(float Value)
@@ -144,12 +152,41 @@ void AHT_BaseCharacter::OnInventoryWidget()
 		if (GameInstance->UserInventoryWidget->GetVisibility() == ESlateVisibility::Visible)
 		{
 			GameInstance->UserInventoryWidget->SetVisibility(ESlateVisibility::Collapsed);
-			GetWorld()->GetFirstPlayerController()->bShowMouseCursor = false;
-			GetWorld()->GetFirstPlayerController()->bEnableClickEvents = false;
+
+			if (GameInstance->EquipWidget->GetVisibility() == ESlateVisibility::Collapsed)
+			{
+				GetWorld()->GetFirstPlayerController()->bShowMouseCursor = false;
+				GetWorld()->GetFirstPlayerController()->bEnableClickEvents = false;
+			}
 		}
 		else
 		{
 			GameInstance->UserInventoryWidget->SetVisibility(ESlateVisibility::Visible);
+			GetWorld()->GetFirstPlayerController()->bShowMouseCursor = true;
+			GetWorld()->GetFirstPlayerController()->bEnableClickEvents = true;
+		}
+	}
+}
+
+void AHT_BaseCharacter::OnEquipInventoryWidget()
+{
+	UHT_GameInstance* GameInstance = Cast<UHT_GameInstance>(GetWorld()->GetGameInstance());
+
+	if (GameInstance != NULL)
+	{
+		if (GameInstance->EquipWidget->GetVisibility() == ESlateVisibility::Visible)
+		{
+			GameInstance->EquipWidget->SetVisibility(ESlateVisibility::Collapsed);
+
+			if (GameInstance->UserInventoryWidget->GetVisibility() == ESlateVisibility::Collapsed)
+			{
+				GetWorld()->GetFirstPlayerController()->bShowMouseCursor = false;
+				GetWorld()->GetFirstPlayerController()->bEnableClickEvents = false;
+			}
+		}
+		else
+		{
+			GameInstance->EquipWidget->SetVisibility(ESlateVisibility::Visible);
 			GetWorld()->GetFirstPlayerController()->bShowMouseCursor = true;
 			GetWorld()->GetFirstPlayerController()->bEnableClickEvents = true;
 		}
@@ -268,31 +305,12 @@ void AHT_BaseCharacter::WeaponChange(FItem_Info NewWeaponInfo)
 
 void AHT_BaseCharacter::EquipChange(FItem_Info NewEquip)
 {
-	UHT_GameInstance* GameInstance = Cast<UHT_GameInstance>(GetWorld()->GetGameInstance());
+	EquipChange_Server(NewEquip);
+}
 
-	if (GameInstance == NULL)
-		return;
-
-	switch (NewEquip.Item_Type)
-	{
-	case E_ITEM_TYPE::ITEM_TYPE_EQUIP_UPPER:
-
-		UpperMesh->SetSkeletalMesh(GameInstance->EquipMeshs[NewEquip.Item_Num - 8]);
-		
-		break;
-
-	case E_ITEM_TYPE::ITEM_TYPE_EQUIP_LOWER:
-
-		LowerMesh->SetSkeletalMesh(GameInstance->EquipMeshs[NewEquip.Item_Num - 11]);
-
-		break;
-
-	case E_ITEM_TYPE::ITEM_TYPE_EQUIP_FOOT:
-
-		FootMesh->SetSkeletalMesh(GameInstance->EquipMeshs[NewEquip.Item_Num - 14]);
-
-		break;
-	}
+void AHT_BaseCharacter::DetachEquip(E_ITEM_TYPE Equip_Type)
+{
+	DetachEquip_Server(Equip_Type);
 }
 
 void AHT_BaseCharacter::SetPlayerState(E_PLAYER_STATE NewPlayerState)
@@ -461,6 +479,23 @@ void AHT_BaseCharacter::SpawnWeapon_Implementation(FItem_Info NewWeaponInfo)
 
 		AttatchWeapon(NewWeaponInfo, pSpawnWeapon->GetName(), pSpawnSubWeapon->GetName());
 		
+		if (GetWorld()->IsServer())
+		{
+			Weapon = pSpawnWeapon;
+			Weapon->OwnerCharacter = this;
+			Weapon->SetWeaponIndex(NewWeaponInfo.Item_Num);
+			Weapon->SetWeaponType(E_WEAPON_TYPE::WEAPON_DUAL_BLADE);
+			Weapon->AttachMeshToPawn(TEXT("DualBlade_RH"));
+			Weapon->OwnerCharacterNum = PlayerNum;
+
+			SubWeapon = pSpawnSubWeapon;
+			SubWeapon->OwnerCharacter = this;
+			SubWeapon->SetWeaponIndex(NewWeaponInfo.Item_Num);
+			SubWeapon->SetWeaponType(E_WEAPON_TYPE::WEAPON_DUAL_BLADE);
+			SubWeapon->AttachMeshToPawn(TEXT("DualBlade_LH"));
+			SubWeapon->OwnerCharacterNum = PlayerNum;
+		}
+		
 		break;
 	}
 }
@@ -472,11 +507,14 @@ bool AHT_BaseCharacter::SpawnWeapon_Validate(FItem_Info NewWeaponInfo)
 
 void AHT_BaseCharacter::AttatchWeapon_Implementation(FItem_Info WeaponInfo, const FString& SpawnWeaponName, const FString& SpawnSubWeaponName /*= FString()*/)
 {
-	IsWeaponChange = true;
+	if (GetWorld()->IsClient())
+	{
+		IsWeaponChange = true;
 
-	ChangeWeaponInfo = WeaponInfo;
-	ChangeWeaponName = SpawnWeaponName;
-	ChangeSubWeaponName = SpawnSubWeaponName;
+		ChangeWeaponInfo = WeaponInfo;
+		ChangeWeaponName = SpawnWeaponName;
+		ChangeSubWeaponName = SpawnSubWeaponName;
+	}	
 }
 
 void AHT_BaseCharacter::BeginAttack_Implementation()
@@ -534,12 +572,12 @@ void AHT_BaseCharacter::DestroyWeapon_Implementation()
 	{
 		Weapon->Destroy();
 		Weapon = NULL;
-
-		UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("무기를 지웠다!"));
 	}
-	else
+	
+	if (SubWeapon != NULL)
 	{
-		UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("무기를 못 지웠다!"));
+		SubWeapon->Destroy();
+		SubWeapon = NULL;
 	}
 }
 
@@ -548,17 +586,123 @@ bool AHT_BaseCharacter::DestroyWeapon_Validate()
 	return true;
 }
 
+void AHT_BaseCharacter::AddItem_Implementation(FItem_Info Info)
+{
+	UHT_GameInstance* GameInstance = Cast<UHT_GameInstance>(GetWorld()->GetGameInstance());
+
+	if (GameInstance != NULL)
+	{
+		GameInstance->UserInventoryWidget->AddItem(Info);
+
+		TakeItemList.Add(Info);
+	}
+}
+
+void AHT_BaseCharacter::EquipChange_Server_Implementation(FItem_Info NewEquip)
+{
+	EquipChange_Client(NewEquip);
+}
+
+bool AHT_BaseCharacter::EquipChange_Server_Validate(FItem_Info NewEquip)
+{
+	return true;
+}
+
+void AHT_BaseCharacter::EquipChange_Client_Implementation(FItem_Info NewEquip)
+{
+	UHT_GameInstance* GameInstance = Cast<UHT_GameInstance>(GetWorld()->GetGameInstance());
+
+	if (GameInstance != NULL)
+	{
+		switch (NewEquip.Item_Type)
+		{
+		case E_ITEM_TYPE::ITEM_TYPE_EQUIP_UPPER:
+
+			UpperMesh->SetSkeletalMesh(GameInstance->EquipMeshs[NewEquip.Item_Num - 8]);
+
+			break;
+
+		case E_ITEM_TYPE::ITEM_TYPE_EQUIP_LOWER:
+
+			LowerMesh->SetSkeletalMesh(GameInstance->EquipMeshs[NewEquip.Item_Num - 8]);
+
+			break;
+
+		case E_ITEM_TYPE::ITEM_TYPE_EQUIP_FOOT:
+
+			FootMesh->SetSkeletalMesh(GameInstance->EquipMeshs[NewEquip.Item_Num - 8]);
+
+			break;
+		}
+	}
+}
+
+void AHT_BaseCharacter::DetachEquip_Server_Implementation(E_ITEM_TYPE Equip_Type)
+{
+	DetachEquip_Client(Equip_Type);
+}
+
+bool AHT_BaseCharacter::DetachEquip_Server_Validate(E_ITEM_TYPE Equip_Type)
+{
+	return true;
+}
+
+void AHT_BaseCharacter::DetachEquip_Client_Implementation(E_ITEM_TYPE Equip_Type)
+{
+	switch (Equip_Type)
+	{
+	case E_ITEM_TYPE::ITEM_TYPE_EQUIP_UPPER:
+
+		UpperMesh->SetSkeletalMesh(NULL);
+
+		break;
+
+	case E_ITEM_TYPE::ITEM_TYPE_EQUIP_LOWER:
+
+		LowerMesh->SetSkeletalMesh(NULL);
+
+		break;
+
+	case E_ITEM_TYPE::ITEM_TYPE_EQUIP_FOOT:
+
+		FootMesh->SetSkeletalMesh(NULL);
+
+		break;
+
+	case E_ITEM_TYPE::ITEM_TYPE_WEAPON_SCYTHE:
+
+	case E_ITEM_TYPE::ITEM_TYPE_WEAPON_DUAL_BLADE:
+
+		DestroyWeapon();
+
+		break;
+	}
+}
+
 // Called when the game starts or when spawned
 void AHT_BaseCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	UHT_UserNameWidget* Widget = Cast<UHT_UserNameWidget>(UserNameWidget->GetUserWidgetObject());
-
-	if (Widget != NULL)
+	if (GetWorld()->IsClient())
 	{
-		UHT_GameInstance* GameInstance = Cast<UHT_GameInstance>(GetWorld()->GetGameInstance());
-		Widget->UserName = TEXT("진서연")/*GameInstance->UserInfo.ID*/;
+		if (UserNameWidget != NULL)
+		{
+			UHT_GameInstance* GameInstance = Cast<UHT_GameInstance>(GetWorld()->GetGameInstance());
+
+			if (GameInstance != NULL)
+			{
+				AHT_StagePlayerState* StagePlayerStage = Cast<AHT_StagePlayerState>(PlayerState);
+
+				if (StagePlayerStage != NULL)
+				{
+					if (StagePlayerStage->ClientPlayerNum == GameInstance->PlayerNum)
+					{
+						UserNameWidget->UserName = GameInstance->CharacterData[GameInstance->CharacterCurIndex].Name;
+					}
+				}				
+			}
+		}
 	}
 
 	if (GetWorld()->IsClient()) //소유중인 클라이언트에서만 실행.
@@ -578,7 +722,7 @@ void AHT_BaseCharacter::BeginPlay()
 					UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("UI 설정 !!"));
 
 				}
-			}			
+			}
 		}
 	}
 }
@@ -599,6 +743,27 @@ void AHT_BaseCharacter::Tick(float DeltaTime)
 
 		UScrollBox* ScrollBox = Cast<UScrollBox>(GameInstance->ChattingWidget->GetWidgetFromName("ChattingLogWidget"));
 		ScrollBox->ScrollToEnd();
+	}
+
+	if (GetWorld()->IsClient() && TakeItemList.Num() != 0)
+	{
+		UHT_GameInstance* GameInstance = Cast<UHT_GameInstance>(GetWorld()->GetGameInstance());
+
+		if (GameInstance != NULL)
+		{
+			AHT_StagePlayerState* StagePlayerStage = Cast<AHT_StagePlayerState>(PlayerState);
+
+			if (StagePlayerStage->ClientPlayerNum == GameInstance->PlayerNum)
+			{
+				if (GameInstance->TakeItemWidget->GetVisibility() == ESlateVisibility::Collapsed)
+				{
+					GameInstance->TakeItemWidget->SetVisibility(ESlateVisibility::Visible);
+					GameInstance->StageWidet->PlayTakeItemAnim(TakeItemList[0]);
+
+					TakeItemList.RemoveAt(0);
+				}				
+			}
+		}
 	}
 			
 	if (IsWeaponChange)
@@ -641,6 +806,51 @@ void AHT_BaseCharacter::Tick(float DeltaTime)
 			}
 
 			break;
+
+		case E_ITEM_TYPE::ITEM_TYPE_WEAPON_DUAL_BLADE:
+
+			for (int i = 0; i < WeaponList.Num(); ++i)
+			{
+				AHT_BaseWeapon* pWeapon = Cast<AHT_BaseWeapon>(WeaponList[i]);
+
+				if (pWeapon != NULL)
+				{
+					if (ChangeWeaponName == pWeapon->GetName())
+					{
+						Weapon = pWeapon;
+						Weapon->OwnerCharacter = this;
+						Weapon->SetWeaponIndex(ChangeWeaponInfo.Item_Num);
+						Weapon->SetWeaponType(E_WEAPON_TYPE::WEAPON_DUAL_BLADE);
+						Weapon->AttachMeshToPawn(TEXT("DualBlade_RH"));
+						Weapon->OwnerCharacterNum = PlayerNum;
+
+						IsWeaponChange = false;
+
+						ChangeWeaponName = FString();
+					}
+					else if (ChangeSubWeaponName == pWeapon->GetName())
+					{
+						SubWeapon = pWeapon;
+						SubWeapon->OwnerCharacter = this;
+						SubWeapon->SetWeaponIndex(ChangeWeaponInfo.Item_Num);
+						SubWeapon->SetWeaponType(E_WEAPON_TYPE::WEAPON_DUAL_BLADE);
+						SubWeapon->AttachMeshToPawn(TEXT("DualBlade_LH"));
+						SubWeapon->OwnerCharacterNum = PlayerNum;
+						
+						ChangeSubWeaponName = FString();
+					}
+				}
+
+				if (ChangeWeaponName == ChangeSubWeaponName)
+				{
+					ChangeWeaponInfo = FItem_Info();
+					IsWeaponChange = false;
+
+					break;
+				}
+			}
+
+			break;
 		}
 	}
 }
@@ -661,9 +871,10 @@ void AHT_BaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 		PlayerInputComponent->BindAxis("Zoom", this, &AHT_BaseCharacter::Zoom);
 		PlayerInputComponent->BindAction("Inventory", IE_Pressed, this, &AHT_BaseCharacter::OnInventoryWidget);
 		PlayerInputComponent->BindAction("NpcTalk", IE_Pressed, this, &AHT_BaseCharacter::Test);
-		PlayerInputComponent->BindAction("ItemTake", IE_Pressed, this, &AHT_BaseCharacter::Action_ItemTake);
+		//PlayerInputComponent->BindAction("ItemTake", IE_Pressed, this, &AHT_BaseCharacter::Action_ItemTake);
 		PlayerInputComponent->BindAction("Enter", IE_Pressed, this, &AHT_BaseCharacter::OnInputTextWidget);
 		PlayerInputComponent->BindAction("Space", IE_Pressed, this, &AHT_BaseCharacter::OnTestFunction);
 		PlayerInputComponent->BindAction("Attack", IE_Pressed, this, &AHT_BaseCharacter::Attack);
+		PlayerInputComponent->BindAction("EquipInventory", IE_Pressed, this, &AHT_BaseCharacter::OnEquipInventoryWidget);
 	}
 }

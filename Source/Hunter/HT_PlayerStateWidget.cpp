@@ -20,5 +20,11 @@ void UHT_PlayerStateWidget::NativeTick(const FGeometry& MyGeometry, float InDelt
 		HpPersent /= 100.0f;
 
 		HpString = FString::Printf(TEXT("%d%s%d"), (int)OwnerPlayer->Health, TEXT(" / "), (int)OwnerPlayer->MaxHealth);
+
+		MpPersent = OwnerPlayer->Mana / OwnerPlayer->MaxMana * 100;
+
+		MpPersent /= 100.0f;
+
+		MpString = FString::Printf(TEXT("%d%s%d"), (int)OwnerPlayer->Mana, TEXT(" / "), (int)OwnerPlayer->MaxMana);
 	}
 }

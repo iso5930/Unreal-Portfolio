@@ -31,9 +31,6 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* FollowCamera;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Widget, meta = (AllowPrivateAccess = "true"))
-	class UWidgetComponent* UserNameWidget;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Collision, meta = (AllowPrivateAccess = "true"))
 	UBoxComponent* AttackCollision_01;
 
@@ -62,6 +59,8 @@ private:
 
 	E_PLAYER_STATE CurPlayerState;
 
+	TArray<FItem_Info> TakeItemList;
+
 public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Weapon)
 	FName WeaponAttachPointName;
@@ -69,8 +68,14 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 	class AHT_BaseWeapon* Weapon;
 
+	UPROPERTY(BlueprintReadWrite)
+	class UHT_UserNameWidget* UserNameWidget;
+
 	float Health;
 	float MaxHealth;
+
+	float Mana;
+	float MaxMana;
 
 	class AHT_BaseWeapon* SubWeapon;
 	
@@ -93,6 +98,7 @@ public:
 
 public:
 	void OnInventoryWidget();
+	void OnEquipInventoryWidget();
 	void Attack();
 	void Test();
 	void Action_ItemTake();
@@ -106,6 +112,7 @@ public:
 	FName GetWeaponAttachPointName() const;
 	void WeaponChange(FItem_Info NewWeaponInfo);
 	void EquipChange(FItem_Info NewEquip);
+	void DetachEquip(E_ITEM_TYPE Equip_Type);
 
 public:
 	UFUNCTION(BlueprintCallable)
@@ -140,7 +147,7 @@ public:
 
 	bool SpawnWeapon_Validate(FItem_Info NewWeaponInfo);
 
-	UFUNCTION(Client, Reliable)
+	UFUNCTION(NetMulticast, Reliable)
 	void AttatchWeapon(FItem_Info WeaponInfo, const FString& SpawnWeaponName, const FString& SpawnSubWeaponName = FString());
 
 	virtual void AttatchWeapon_Implementation(FItem_Info WeaponInfo, const FString& SpawnWeaponName, const FString& SpawnSubWeaponName = FString());
@@ -166,6 +173,35 @@ public:
 	virtual void DestroyWeapon_Implementation();
 
 	bool DestroyWeapon_Validate();
+
+	UFUNCTION(Client, Reliable)
+	void AddItem(FItem_Info Info);
+
+	virtual void AddItem_Implementation(FItem_Info Info);
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void EquipChange_Server(FItem_Info NewEquip);
+
+	virtual void EquipChange_Server_Implementation(FItem_Info NewEquip);
+
+	bool EquipChange_Server_Validate(FItem_Info NewEquip);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void EquipChange_Client(FItem_Info NewEquip);
+
+	virtual void EquipChange_Client_Implementation(FItem_Info NewEquip);
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void DetachEquip_Server(E_ITEM_TYPE Equip_Type);
+
+	virtual void DetachEquip_Server_Implementation(E_ITEM_TYPE Equip_Type);
+
+	bool DetachEquip_Server_Validate(E_ITEM_TYPE Equip_Type);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void DetachEquip_Client(E_ITEM_TYPE Equip_Type);
+
+	virtual void DetachEquip_Client_Implementation(E_ITEM_TYPE Equip_Type);
 	
 protected:
 	// Called when the game starts or when spawned

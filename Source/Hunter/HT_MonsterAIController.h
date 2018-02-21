@@ -47,6 +47,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = Behavior)
 	void MonsterAttack01();
 
+	UFUNCTION(BlueprintCallable, Category = Behavior)
+	void MonsterAttack02();
+
 	E_MONSTER_STATE GetBlackBoardMonsterState();
 
 public:

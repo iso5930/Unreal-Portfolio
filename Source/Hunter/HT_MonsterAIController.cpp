@@ -121,6 +121,29 @@ void AHT_MonsterAIController::MonsterAttack01()
 	}
 }
 
+void AHT_MonsterAIController::MonsterAttack02()
+{
+	AHT_BaseMonster* pMonster = Cast<AHT_BaseMonster>(GetPawn());
+
+	if (pMonster != NULL)
+	{
+		//·£´ý °ª ¼³Á¤.
+
+		int Num = (int)FMath::RandRange(0.0f, 2.0f);
+
+		pMonster->Troll_Attack(Num);
+		
+		if (Num == 2)
+		{
+			BlackboardComponent->SetValueAsFloat(TEXT("WaitTime"), 4.2f);
+		}
+		else
+		{
+			BlackboardComponent->SetValueAsFloat(TEXT("WaitTime"), 2.3f);
+		}
+	}
+}
+
 E_MONSTER_STATE AHT_MonsterAIController::GetBlackBoardMonsterState()
 {
 	return (E_MONSTER_STATE)BlackboardComponent->GetValueAsEnum(TEXT("MonsterState"));

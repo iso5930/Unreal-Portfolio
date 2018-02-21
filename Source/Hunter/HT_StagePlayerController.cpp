@@ -9,6 +9,7 @@
 #include "HT_EquipInventory_Widget.h"
 #include "HT_BaseCharacter.h"
 #include "HT_MonsterHpWidget.h"
+#include "HT_TakeItemWidget.h"
 
 void AHT_StagePlayerController::SetPlayerNum_Implementation(int Num)
 {
@@ -178,11 +179,14 @@ void AHT_StagePlayerController::BeginPlay()
 			GameInstance->StageWidet = Cast<UHT_StageWidget>(NewWidget);
 
 			GameInstance->EquipWidget = Cast<UHT_EquipInventory_Widget>(NewWidget->GetWidgetFromName("EquipInventoryWidget"));
-			//GameInstance->EquipWidget->SetVisibility(ESlateVisibility::Collapsed);
+			GameInstance->EquipWidget->SetVisibility(ESlateVisibility::Collapsed);
 
 			GameInstance->MonsterHpWidget = Cast<UHT_MonsterHpWidget>(NewWidget->GetWidgetFromName("MonsterHpWidget"));
 
 			GameInstance->PlayerStateWidget = Cast<UHT_PlayerStateWidget>(NewWidget->GetWidgetFromName("PlayerStateWidget"));
+
+			GameInstance->TakeItemWidget = Cast<UHT_TakeItemWidget>(NewWidget->GetWidgetFromName("TakeItemWidget"));
+			//GameInstance->TakeItemWidget->SetVisibility(ESlateVisibility::Collapsed);
 		}
 	}
 }

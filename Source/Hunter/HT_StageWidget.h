@@ -14,5 +14,12 @@ class HUNTER_API UHT_StageWidget : public UUserWidget
 	GENERATED_BODY()
 
 public:
+	UPROPERTY(BlueprintReadWrite)
+	UWidgetAnimation* TakeItemAnim;
+
+public:
+	void PlayTakeItemAnim(FItem_Info Info);
+
+public:
 	virtual bool NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override;
 };

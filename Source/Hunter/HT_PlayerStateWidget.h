@@ -18,7 +18,13 @@ public:
 	float HpPersent;
 
 	UPROPERTY(BlueprintReadWrite)
+	float MpPersent;
+
+	UPROPERTY(BlueprintReadWrite)
 	FString HpString;
+
+	UPROPERTY(BlueprintReadWrite)
+	FString MpString;
 
 	class AHT_BaseCharacter* OwnerPlayer;
 

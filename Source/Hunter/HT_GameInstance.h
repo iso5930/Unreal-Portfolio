@@ -34,6 +34,7 @@ public:
 	class UHT_DropItemWidget* DropItemWidget;
 	class UUserWidget* ItemToolTipWidget;
 
+	UPROPERTY(BlueprintReadWrite)
 	class UHT_StageWidget* StageWidet;
 
 	class UUserWidget* NPCMenuWidget = NULL;
@@ -45,6 +46,8 @@ public:
 	class UHT_MonsterHpWidget* MonsterHpWidget;
 
 	class UHT_PlayerStateWidget* PlayerStateWidget;
+
+	class UHT_TakeItemWidget* TakeItemWidget;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "InventoryWidget")
 	TSubclassOf<class UUserWidget> InventorySlotDragWidget;

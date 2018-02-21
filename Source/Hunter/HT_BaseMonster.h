@@ -28,6 +28,10 @@ public:
 
 	UAnimMontage* Attack_Montage;
 
+	UAnimMontage* TrollAttack_MontageA;
+	UAnimMontage* TrollAttack_MontageB;
+	UAnimMontage* TrollAttack_MontageC;
+
 public:
 	UPROPERTY(Replicated)
 	E_MONSTER_STATE MonsterState;
@@ -66,6 +70,11 @@ public:
 	void MonsterAttack();
 
 	void MonsterAttack_Implementation();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Troll_Attack(int Num);
+
+	void Troll_Attack_Implementation(int Num);
 
 protected:
 	// Called when the game starts or when spawned

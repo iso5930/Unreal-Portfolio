@@ -50,15 +50,15 @@ FReply UHT_InventorySlotWidget::NativeOnMouseButtonDown(const FGeometry& InGeome
 			{
 				UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("캐스팅 성공"));
 			}
-			else if(Player == NULL)
+			else if (Player == NULL)
 			{
 				UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("캐스팅 실패"));
 			}
 
-			FItem_Info TempItem = InventoryWidget->InventoryData[SlotIndex];
-
 			if (ItemSlotType == E_ITEM_SLOT_TYPE::ITEM_SLOT_INVENTORY)
 			{
+				FItem_Info TempItem = InventoryWidget->InventoryData[SlotIndex];
+
 				switch (SlotItem.Item_Type)
 				{
 				case E_ITEM_TYPE::ITEM_TYPE_EQUIP_UPPER:
@@ -115,12 +115,64 @@ FReply UHT_InventorySlotWidget::NativeOnMouseButtonDown(const FGeometry& InGeome
 					GameInstance->EquipWidget->ReflashSlot();
 
 					break;
+
+				case E_ITEM_TYPE::ITEM_TYPE_POTION:
+
+					if (TempItem.Item_Cnt == 1)
+					{
+						InventoryWidget->InventoryData[SlotIndex] = FItem_Info();
+					}
+					else
+					{
+						--InventoryWidget->InventoryData[SlotIndex].Item_Cnt;
+					}
+
+					if (TempItem.Item_Num % 2 == 0)
+					{						
+						Player->Health += TempItem.Item_Num * 50 + 100;
+
+						if (Player->Health > Player->MaxHealth)
+						{
+							Player->Health = Player->MaxHealth;
+						}
+					}
+					else
+					{
+						Player->Mana += TempItem.Item_Num * 50 + 100;
+
+						if (Player->Mana > Player->MaxMana)
+						{
+							Player->Mana = Player->MaxMana;
+						}
+					}
+
+					break;
 				}
 			}
 			else if (ItemSlotType == E_ITEM_SLOT_TYPE::ITEM_SLOT_EQUIP)
 			{
-				
-			}		
+				//장착 해제.
+
+				UHT_EquipInventory_Widget* EquipWidget = GameInstance->EquipWidget;
+
+				FItem_Info TempItem = EquipWidget->Equip_Data[SlotIndex];
+
+				for (int i = 0; i < InventoryWidget->InventoryData.Num(); ++i)
+				{
+					if (InventoryWidget->InventoryData[i].Item_Image == NULL)
+					{
+						InventoryWidget->InventoryData[i] = TempItem;
+
+						EquipWidget->Equip_Data[SlotIndex] = FItem_Info();
+
+						EquipWidget->ReflashSlot();
+
+						break;
+					}
+				}  //데이터는 옮김. 실제 보이는것을 수정 하자.
+
+				Player->DetachEquip(TempItem.Item_Type);
+			}
 
 			InventoryWidget->ReflashSlot();
 		}
@@ -143,25 +195,28 @@ void UHT_InventorySlotWidget::NativeOnDragDetected(const FGeometry& InGeometry, 
 
 		UHT_InventoryDragDropOperation* DragDropOp = NewObject<UHT_InventoryDragDropOperation>(UHT_InventoryDragDropOperation::StaticClass());
 
-		Cast<UHT_InventorySlotWidget>(NewWidget->GetWidgetFromName("DragSlot"))->SlotItem = SlotItem;
-
-		SlotItem = FItem_Info();
-
-		InventoryWidget->InventoryData[SlotIndex] = SlotItem;
-
-		if (DragDropOp)
+		if (ItemSlotType == E_ITEM_SLOT_TYPE::ITEM_SLOT_INVENTORY)
 		{
-			DragDropOp->DragIndex = SlotIndex;
-			DragDropOp->DragSlot = NewWidget;
-			DragDropOp->PrevSlot = this;
+			Cast<UHT_InventorySlotWidget>(NewWidget->GetWidgetFromName("DragSlot"))->SlotItem = SlotItem;
 
-			DragDropOp->Payload = NewWidget;
-			DragDropOp->DefaultDragVisual = NewWidget;
-			DragDropOp->DragType = E_ITEM_DROP_TYPE::ITEM_DROP_SLOT;
-			InOperation = DragDropOp;
-		}
+			SlotItem = FItem_Info();
 
-		InventoryWidget->ReflashSlot();
+			InventoryWidget->InventoryData[SlotIndex] = SlotItem;
+
+			if (DragDropOp)
+			{
+				DragDropOp->DragIndex = SlotIndex;
+				DragDropOp->DragSlot = NewWidget;
+				DragDropOp->PrevSlot = this;
+
+				DragDropOp->Payload = NewWidget;
+				DragDropOp->DefaultDragVisual = NewWidget;
+				DragDropOp->DragType = E_ITEM_DROP_TYPE::ITEM_DROP_SLOT;
+				InOperation = DragDropOp;
+			}
+
+			InventoryWidget->ReflashSlot();
+		}		
 	}
 }
 
@@ -175,20 +230,23 @@ bool UHT_InventorySlotWidget::NativeOnDrop(const FGeometry& InGeometry, const FD
 		{
 			UHT_InventorySlotWidget* DragSlot = Cast<UHT_InventorySlotWidget>(DragDropOp->DragSlot->GetWidgetFromName("DragSlot"));
 
-			Cast<UHT_InventorySlotWidget>(DragDropOp->PrevSlot)->SlotItem = SlotItem;
-
-			SlotItem = DragSlot->SlotItem;
-			DragSlot->SlotItem = FItem_Info();
-
-			UHT_GameInstance* GameInstance = Cast<UHT_GameInstance>(GetWorld()->GetGameInstance());
-
-			if (GameInstance != NULL)
+			if (ItemSlotType == E_ITEM_SLOT_TYPE::ITEM_SLOT_INVENTORY)
 			{
-				UHT_InventoryWidget* InventoryWidget = Cast<UHT_InventoryWidget>(GameInstance->UserInventoryWidget);
+				Cast<UHT_InventorySlotWidget>(DragDropOp->PrevSlot)->SlotItem = SlotItem;
 
-				InventoryWidget->InventoryData[SlotIndex] = SlotItem;
-				InventoryWidget->InventoryData[DragDropOp->DragIndex] = Cast<UHT_InventorySlotWidget>(DragDropOp->PrevSlot)->SlotItem;
-				InventoryWidget->ReflashSlot();
+				SlotItem = DragSlot->SlotItem;
+				DragSlot->SlotItem = FItem_Info();
+
+				UHT_GameInstance* GameInstance = Cast<UHT_GameInstance>(GetWorld()->GetGameInstance());
+
+				if (GameInstance != NULL)
+				{
+					UHT_InventoryWidget* InventoryWidget = Cast<UHT_InventoryWidget>(GameInstance->UserInventoryWidget);
+
+					InventoryWidget->InventoryData[SlotIndex] = SlotItem;
+					InventoryWidget->InventoryData[DragDropOp->DragIndex] = Cast<UHT_InventorySlotWidget>(DragDropOp->PrevSlot)->SlotItem;
+					InventoryWidget->ReflashSlot();
+				}
 			}
 		}
 	}

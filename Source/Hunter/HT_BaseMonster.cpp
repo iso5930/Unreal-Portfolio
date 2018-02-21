@@ -7,6 +7,7 @@
 #include "UnrealNetwork.h"
 #include "HT_GameInstance.h"
 #include "HT_MonsterHpWidget.h"
+#include "HT_BaseCharacter.h"
 
 // Sets default values
 AHT_BaseMonster::AHT_BaseMonster()
@@ -36,6 +37,27 @@ AHT_BaseMonster::AHT_BaseMonster()
 		Attack_Montage = AnimMontage1.Object;
 
 		UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("베어 불러오기 성공"));
+	}
+
+	ConstructorHelpers::FObjectFinder<UAnimMontage> AnimMontage2(TEXT("/Game/Monster/Troll/Animations/Montage/Troll_AttackA01_Montage"));
+
+	if (AnimMontage2.Object != NULL)
+	{
+		TrollAttack_MontageA = AnimMontage2.Object;
+	}
+
+	ConstructorHelpers::FObjectFinder<UAnimMontage> AnimMontage3(TEXT("/Game/Monster/Troll/Animations/Montage/Troll_AttackA02_Montage"));
+
+	if (AnimMontage3.Object != NULL)
+	{
+		TrollAttack_MontageB = AnimMontage3.Object;
+	}
+
+	ConstructorHelpers::FObjectFinder<UAnimMontage> AnimMontage4(TEXT("/Game/Monster/Troll/Animations/Montage/Troll_AttackA03_Montage"));
+
+	if (AnimMontage4.Object != NULL)
+	{
+		TrollAttack_MontageC = AnimMontage4.Object;
 	}
 
 	//Bear_MeleeAttack
@@ -97,7 +119,19 @@ float AHT_BaseMonster::TakeDamage(float Damage, struct FDamageEvent const& Damag
 				AIController->SetTarget(NULL);
 			}
 
-			//Destroy();
+			//DamageCauser 이게 플레이어 인 듯.
+
+			AHT_BaseCharacter* pPlayer = Cast<AHT_BaseCharacter>(DamageCauser);
+
+			if (pPlayer != NULL)
+			{
+				UHT_GameInstance* GameInstance = Cast<UHT_GameInstance>(GetWorld()->GetGameInstance());
+
+				if (GameInstance != NULL)
+				{
+					pPlayer->AddItem(GameInstance->Item_DataBase[2]);
+				}
+			}
 		}
 
 		UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("서버 충돌 함수"));
@@ -144,6 +178,39 @@ void AHT_BaseMonster::MonsterAttack_Implementation()
 	}
 }
 
+void AHT_BaseMonster::Troll_Attack_Implementation(int Num)
+{
+	switch (Num)
+	{
+	case 0:
+
+		if (TrollAttack_MontageA != NULL)
+		{
+			PlayAnimMontage(TrollAttack_MontageA);
+		}
+
+		break;
+
+	case 1:
+
+		if (TrollAttack_MontageB != NULL)
+		{
+			PlayAnimMontage(TrollAttack_MontageB);
+		}
+
+		break;
+
+	case 2:
+
+		if (TrollAttack_MontageC != NULL)
+		{
+			PlayAnimMontage(TrollAttack_MontageC);
+		}
+
+		break;
+	}
+}
+
 // Called when the game starts or when spawned
 void AHT_BaseMonster::BeginPlay()
 {
@@ -161,7 +228,7 @@ void AHT_BaseMonster::Tick(float DeltaTime)
 
 		/*
 		
-		//나중에 Alpha로 서서히 사라지도록..
+		//나중에 Alpha로 서서히 사라지도록.. //트롤과 베어의 시간이 다르다..
 
 		*/
 

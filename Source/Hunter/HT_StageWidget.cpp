@@ -8,6 +8,22 @@
 #include "CanvasPanel.h"
 #include "HT_StageWidget.h"
 #include "HT_EquipInventory_Widget.h"
+#include "HT_TakeItemWidget.h"
+
+void UHT_StageWidget::PlayTakeItemAnim(FItem_Info Info)
+{
+	if (TakeItemAnim != NULL)
+	{
+		UHT_GameInstance* GameInstance = Cast<UHT_GameInstance>(GetWorld()->GetGameInstance());
+
+		if (GameInstance != NULL)
+		{
+			PlayAnimation(TakeItemAnim);
+
+			GameInstance->TakeItemWidget->TakeItem = Info;
+		}
+	}
+}
 
 bool UHT_StageWidget::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
 {
