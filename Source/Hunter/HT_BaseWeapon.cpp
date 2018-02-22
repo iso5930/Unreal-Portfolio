@@ -154,6 +154,61 @@ void AHT_BaseWeapon::Attack_Implementation()
 	}
 }
 
+void AHT_BaseWeapon::StrongAttack_Implementation()
+{
+	E_PLAYER_STATE PlayerState = OwnerCharacter->GetCurPlayerState();
+
+	float NewMana = OwnerCharacter->Mana - (int)PlayerState * 10;
+
+	if (NewMana < 0)
+		return;
+
+	if (PlayerState == E_PLAYER_STATE::PLAYER_STATE_ATTACK01 && IsNextAttack)
+	{
+		OwnerCharacter->Mana = NewMana;
+
+		IsNextAttack = false;
+
+		if (StrongAttack01_Montage != NULL)
+		{
+			OwnerCharacter->PlayAnimMontage(StrongAttack01_Montage);
+		}
+	}
+	else if (PlayerState == E_PLAYER_STATE::PLAYER_STATE_ATTACK02 && IsNextAttack)
+	{
+		OwnerCharacter->Mana = NewMana;
+
+		IsNextAttack = false;
+
+		if (StrongAttack02_Montage != NULL)
+		{
+			OwnerCharacter->PlayAnimMontage(StrongAttack02_Montage);
+		}
+	}
+	else if (PlayerState == E_PLAYER_STATE::PLAYER_STATE_ATTACK03 && IsNextAttack)
+	{
+		OwnerCharacter->Mana = NewMana;
+
+		IsNextAttack = false;
+
+		if (StrongAttack03_Montage != NULL)
+		{
+			OwnerCharacter->PlayAnimMontage(StrongAttack03_Montage);
+		}
+	}
+	else if (PlayerState == E_PLAYER_STATE::PLAYER_STATE_ATTACK04 && IsNextAttack)
+	{
+		OwnerCharacter->Mana = NewMana;
+
+		IsNextAttack = false;
+
+		if (StrongAttack04_Montage != NULL)
+		{
+			OwnerCharacter->PlayAnimMontage(StrongAttack04_Montage);
+		}
+	}
+}
+
 // Called every frame
 void AHT_BaseWeapon::Tick(float DeltaTime)
 {

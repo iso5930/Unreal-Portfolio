@@ -95,6 +95,12 @@ public:
 	FString ChangeSubWeaponName;
 	FItem_Info ChangeWeaponInfo;
 	int PlayerNum = -1;
+
+	UPROPERTY(BlueprintReadWrite)
+	float AttackRange = 0.0f;
+
+	UPROPERTY(BlueprintReadWrite)
+	bool IsSphere = false;
 	
 public:
 	// Sets default values for this character's properties
@@ -166,6 +172,13 @@ public:
 	virtual void BeginAttack_Implementation();
 
 	bool BeginAttack_Validate();
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void BeginStrongAttack();
+
+	virtual void BeginStrongAttack_Implementation();
+
+	bool BeginStrongAttack_Validate();
 
 	UFUNCTION(BlueprintCallable)
 	void PointDamage(float Damage);

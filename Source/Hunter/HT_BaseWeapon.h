@@ -31,6 +31,11 @@ protected:
 	UAnimMontage* Attack02_Montage;
 	UAnimMontage* Attack03_Montage;
 	UAnimMontage* Attack04_Montage;
+	
+	UAnimMontage* StrongAttack01_Montage;
+	UAnimMontage* StrongAttack02_Montage;
+	UAnimMontage* StrongAttack03_Montage;
+	UAnimMontage* StrongAttack04_Montage;
 
 protected:
 	int32 WeaponIndex;
@@ -76,6 +81,11 @@ public:
 	void Attack();
 
 	virtual void Attack_Implementation();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void StrongAttack();
+
+	virtual void StrongAttack_Implementation();
 
 public:	
 	// Called every frame

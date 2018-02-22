@@ -198,7 +198,10 @@ void AHT_BaseCharacter::Attack()
 
 void AHT_BaseCharacter::StrongAttack()
 {
-
+	if (Weapon != NULL)
+	{
+		BeginStrongAttack();
+	}
 }
 
 void AHT_BaseCharacter::OnInputTextWidget()
@@ -344,7 +347,7 @@ void AHT_BaseCharacter::AttackBegin()
 			if (GameInstance->PlayerNum == StagePlayerStage->ClientPlayerNum)
 			{
 				MoveForward(0.5f);
-			}			
+			}
 		}
 	}
 }
@@ -372,6 +375,8 @@ void AHT_BaseCharacter::OnWeaponAttackOverlap(class UPrimitiveComponent* Overlap
 	if (GetWorld()->IsServer() && OtherActor->IsA(AHT_BaseMonster::StaticClass()))
 	{
 		UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("몬스터 충돌 피 깍임."));
+
+		//데미지가 유동적으로 변하도록 바꾸자.
 
 		UGameplayStatics::ApplyDamage(OtherActor, 60.0f, NULL, this, UDamageType::StaticClass());
 	}
@@ -498,6 +503,16 @@ void AHT_BaseCharacter::BeginAttack_Implementation()
 }
 
 bool AHT_BaseCharacter::BeginAttack_Validate()
+{
+	return true;
+}
+
+void AHT_BaseCharacter::BeginStrongAttack_Implementation()
+{
+	Weapon->StrongAttack();
+}
+
+bool AHT_BaseCharacter::BeginStrongAttack_Validate()
 {
 	return true;
 }
