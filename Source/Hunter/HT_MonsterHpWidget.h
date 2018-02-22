@@ -38,7 +38,7 @@ public:
 public:
 	TArray<FLinearColor> ColorArray;
 
-	class AHT_BaseMonster* CurMonster;
+	FString SpawnName;
 
 	float StartHP;
 	float EndHP;
@@ -60,5 +60,5 @@ public:
 	FString GetMonsterName();
 
 public:
-	void MonsterTakeDamege(AHT_BaseMonster* Monster, float StartDamage, float EndDamege, FString NewMonsterName, UTexture2D* NewMonsterImage);
+	void MonsterTakeDamege(FString MonsterSpawnName, float StartDamage, float EndDamege, FString NewMonsterName, UTexture2D* NewMonsterImage);
 };

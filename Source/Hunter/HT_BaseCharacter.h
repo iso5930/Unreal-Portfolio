@@ -61,6 +61,15 @@ private:
 
 	TArray<FItem_Info> TakeItemList;
 
+	FString CharacterName; //캐릭터 닉네임 동기화 전용.
+
+	TArray<int> EquipList; //장비 동기화 전용.  //Upper, Lower, Foot
+
+	bool IsNetworkCharacter = true;
+	bool IsBeginPlay = false;
+
+	float AccTime = 0.0f;
+
 public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Weapon)
 	FName WeaponAttachPointName;
@@ -100,9 +109,7 @@ public:
 	void OnInventoryWidget();
 	void OnEquipInventoryWidget();
 	void Attack();
-	void Test();
-	void Action_ItemTake();
-
+	void StrongAttack();
 	void OnInputTextWidget();
 
 public:
@@ -113,6 +120,7 @@ public:
 	void WeaponChange(FItem_Info NewWeaponInfo);
 	void EquipChange(FItem_Info NewEquip);
 	void DetachEquip(E_ITEM_TYPE Equip_Type);
+	void LoadEquip(TArray<FItem_Info> LoadEquipData);
 
 public:
 	UFUNCTION(BlueprintCallable)
@@ -202,14 +210,29 @@ public:
 	void DetachEquip_Client(E_ITEM_TYPE Equip_Type);
 
 	virtual void DetachEquip_Client_Implementation(E_ITEM_TYPE Equip_Type);
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ReflashCharacter_Server(const FString& PlayerName, const TArray<int>& Equip);
+
+	virtual void ReflashCharacter_Server_Implementation(const FString& PlayerName, const TArray<int>& Equip);
+
+	bool ReflashCharacter_Server_Validate(const FString& PlayerName, const TArray<int>& Equip);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void ReflashCharacter_Client(const FString& PlayerName, const TArray<int>& Equip);
+
+	virtual void ReflashCharacter_Client_Implementation(const FString& PlayerName, const TArray<int>& Equip);
+
+	UFUNCTION(Client, Reliable)
+	void OnMonsterWidget(const FString& SpawnName, const FString& MonsterName, float PrevHealth, float CurHealth);
+
+	void OnMonsterWidget_Implementation(const FString& SpawnName, const FString& MonsterName, float PrevHealth, float CurHealth);
 	
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	
 public:
-	//virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 

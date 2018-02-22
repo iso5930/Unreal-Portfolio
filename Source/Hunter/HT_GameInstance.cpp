@@ -60,6 +60,25 @@ UHT_GameInstance::UHT_GameInstance()
 		}
 	}
 
+	TArray<TCHAR*> MonsterImagePaths;
+
+	MonsterImagePaths.Add(TEXT("/Game/Image/Bear"));
+	MonsterImagePaths.Add(TEXT("/Game/Image/Troll"));
+
+	for (int32 i = 0; i < MonsterImagePaths.Num(); ++i)
+	{
+		ConstructorHelpers::FObjectFinder<UTexture2D> MonsterImage(MonsterImagePaths[i]);
+
+		if (MonsterImage.Object != NULL)
+		{
+			MonsterImages.Add(MonsterImage.Object);
+		}
+		else
+		{
+			UE_LOG(LogClass, Warning, TEXT("%d %s %s"), i, TEXT("Monster Image Loading Error!"), MonsterImagePaths[i]);
+		}
+	}
+
 	FItem_Info ItemInfo;
 
 	ConstructorHelpers::FObjectFinder<UTexture2D> Item00(TEXT("/Game/Image/000"));

@@ -105,11 +105,15 @@ float AHT_BaseMonster::TakeDamage(float Damage, struct FDamageEvent const& Damag
 {
 	if (GetWorld()->IsServer())
 	{
-		Health = Health - Damage;
+		float NewHP = Health - Damage;
 
-		if (Health <= 0)
+		UHT_GameInstance* GameInstance = Cast<UHT_GameInstance>(GetWorld()->GetGameInstance());
+
+		AHT_BaseCharacter* pPlayer = Cast<AHT_BaseCharacter>(DamageCauser);
+
+		if (NewHP <= 0)
 		{
-			Health = 0;
+			NewHP = 0;
 
 			AHT_MonsterAIController* AIController = Cast<AHT_MonsterAIController>(GetController());
 
@@ -119,20 +123,20 @@ float AHT_BaseMonster::TakeDamage(float Damage, struct FDamageEvent const& Damag
 				AIController->SetTarget(NULL);
 			}
 
-			//DamageCauser 이게 플레이어 인 듯.
-
-			AHT_BaseCharacter* pPlayer = Cast<AHT_BaseCharacter>(DamageCauser);
-
-			if (pPlayer != NULL)
+			if (pPlayer != NULL && GameInstance != NULL)
 			{
-				UHT_GameInstance* GameInstance = Cast<UHT_GameInstance>(GetWorld()->GetGameInstance());
-
-				if (GameInstance != NULL)
-				{
-					pPlayer->AddItem(GameInstance->Item_DataBase[2]);
-				}
+				pPlayer->AddItem(GameInstance->Item_DataBase[2]);
 			}
 		}
+
+		if (pPlayer != NULL && GameInstance != NULL)
+		{
+			pPlayer->OnMonsterWidget(GetName(), MonsterName, Health, NewHP);
+
+			OnSeePlayer(pPlayer);
+		}
+
+		Health = NewHP;
 
 		UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("서버 충돌 함수"));
 
@@ -158,13 +162,6 @@ void AHT_BaseMonster::ClientTakeDamege_Implementation(float NewHp)
 		}
 
 		UE_LOG(LogClass, Warning, TEXT("%s %f"), TEXT("몬스터 남은 체력"), NewHp);
-
-		//소유중인 클라이언트에서 실행으로 나중에 바꾸기.
-
-		UHT_GameInstance* GameInst = Cast<UHT_GameInstance>(GetWorld()->GetGameInstance());
-
-		GameInst->MonsterHpWidget->SetVisibility(ESlateVisibility::Visible);
-		GameInst->MonsterHpWidget->MonsterTakeDamege(this, Health, NewHp, FString("Bear"), NULL);
 
 		Health = NewHp;
 	}

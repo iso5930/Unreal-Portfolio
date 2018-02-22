@@ -45,6 +45,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void Init_Equip();
 
+	void LocalEquipInventoryLoad();
+	void NetworkEquipInventoryLoad(TArray<FItem_Info> LoadEquipData);
+
 protected:
 	virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 	virtual void NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& InOperation) override;

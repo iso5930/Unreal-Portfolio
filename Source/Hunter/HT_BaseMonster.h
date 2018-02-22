@@ -26,6 +26,9 @@ public:
 	UPROPERTY(VisibleAnywhere, Category = PawnSensing)
 	class UPawnSensingComponent* PawnSensing;
 
+	UPROPERTY(BlueprintReadWrite)
+	FString MonsterName;
+
 	UAnimMontage* Attack_Montage;
 
 	UAnimMontage* TrollAttack_MontageA;

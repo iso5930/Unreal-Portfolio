@@ -5,6 +5,8 @@
 #include "HT_InventorySlotWidget.h"
 #include "HT_GameInstance.h"
 #include "HT_InventoryDragDropOperation.h"
+#include "HT_StagePlayerController.h"
+#include "HT_BaseCharacter.h"
 
 void UHT_EquipInventory_Widget::ReflashSlot()
 {
@@ -19,6 +21,31 @@ void UHT_EquipInventory_Widget::Init_Equip()
 {
 	Equip_Data.Empty();
 
+	UHT_GameInstance* GameInstance = Cast<UHT_GameInstance>(GetWorld()->GetGameInstance());
+
+	if (GameInstance != NULL)
+	{
+		if (GameInstance->IsNetwork)
+		{
+			AHT_StagePlayerController* PlayerController = Cast<AHT_StagePlayerController>(GetWorld()->GetFirstPlayerController());
+
+			if (PlayerController != NULL)
+			{
+				FString CharacterName = GameInstance->CharacterData[GameInstance->CharacterCurIndex].Name;
+
+				//서버로 검사하는 함수 호출.
+				PlayerController->GetPlayerEquipInventory(CharacterName);
+			}
+		}
+		else
+		{
+			LocalEquipInventoryLoad();
+		}
+	}
+}
+
+void UHT_EquipInventory_Widget::LocalEquipInventoryLoad()
+{
 	UHT_GameInstance* GameInstance = Cast<UHT_GameInstance>(GetWorld()->GetGameInstance());
 
 	if (GameInstance != NULL)
@@ -44,9 +71,9 @@ void UHT_EquipInventory_Widget::Init_Equip()
 				FItem_Info ItemInfo;
 
 				int ItemNum = 0;
-				
-				*FileReader << ItemNum;
-				
+
+				*FileReader.Get() << ItemNum;
+
 				if (ItemNum != -1)
 				{
 					ItemInfo = GameInstance->Item_DataBase[ItemNum];
@@ -65,6 +92,60 @@ void UHT_EquipInventory_Widget::Init_Equip()
 			}
 		}
 	}
+
+	APawn* Actor = GetWorld()->GetFirstLocalPlayerFromController()->GetPlayerController(GetWorld())->GetPawn();
+
+	AHT_BaseCharacter* Player = Cast<AHT_BaseCharacter>(Actor);
+
+	if (Player != NULL)
+	{
+		Player->LoadEquip(Equip_Data);
+	}
+
+	ReflashSlot();
+}
+
+void UHT_EquipInventory_Widget::NetworkEquipInventoryLoad(TArray<FItem_Info> LoadEquipData)
+{
+	if (LoadEquipData.Num() != 0)
+	{
+		UHT_GameInstance* GameInstance = Cast<UHT_GameInstance>(GetWorld()->GetGameInstance());
+
+		if (GameInstance != NULL)
+		{
+			for (int i = 0; i < (int)E_EQUIP_SLOT_TYPE::EQUIP_SLOT_END; ++i)
+			{
+				FItem_Info ItemInfo;
+
+				if (LoadEquipData[i].Item_Num != -1)
+				{
+					ItemInfo = GameInstance->Item_DataBase[LoadEquipData[i].Item_Num];
+				}
+
+				Equip_Data.Add(ItemInfo);
+			}
+		}
+	}
+	else
+	{
+		for (int i = 0; i < (int)E_EQUIP_SLOT_TYPE::EQUIP_SLOT_END; ++i)
+		{
+			Equip_Data.Add(FItem_Info());
+		}
+	}
+
+	APawn* Actor = GetWorld()->GetFirstLocalPlayerFromController()->GetPlayerController(GetWorld())->GetPawn();
+
+	AHT_BaseCharacter* Player = Cast<AHT_BaseCharacter>(Actor);
+
+	if (Player != NULL)
+	{
+		UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("장비 새로 고침"));
+
+		Player->LoadEquip(Equip_Data);
+	}
+
+	ReflashSlot();
 }
 
 FReply UHT_EquipInventory_Widget::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)

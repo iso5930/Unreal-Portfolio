@@ -96,11 +96,11 @@ FString UHT_MonsterHpWidget::GetMonsterName()
 	return MonsterName;
 }
 
-void UHT_MonsterHpWidget::MonsterTakeDamege(AHT_BaseMonster* Monster, float StartDamage, float EndDamege, FString NewMonsterName, UTexture2D* NewMonsterImage)
+void UHT_MonsterHpWidget::MonsterTakeDamege(FString MonsterSpawnName, float StartDamage, float EndDamege, FString NewMonsterName, UTexture2D* NewMonsterImage)
 {
-	if (CurMonster != Monster)
+	if (SpawnName != MonsterSpawnName)
 	{
-		CurMonster = Monster;
+		SpawnName = MonsterSpawnName;
 		StartHP = StartDamage;
 		CurHP = StartDamage;
 	}

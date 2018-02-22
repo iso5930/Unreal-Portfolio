@@ -20,6 +20,7 @@
 #include "HT_EquipInventory_Widget.h"
 #include "HT_TakeItemWidget.h"
 #include "HT_StageWidget.h"
+#include "HT_MonsterHpWidget.h"
 
 // Sets default values
 AHT_BaseCharacter::AHT_BaseCharacter()
@@ -88,13 +89,7 @@ AHT_BaseCharacter::AHT_BaseCharacter()
 	Health = 600.0f;
 
 	MaxMana = 200.0f;
-	Mana = 200.0f;
-
-	/*
-	
-	*/
-
-		
+	Mana = 200.0f;		
 }
 
 void AHT_BaseCharacter::MoveForward(float Value)
@@ -201,56 +196,9 @@ void AHT_BaseCharacter::Attack()
 	}
 }
 
-void AHT_BaseCharacter::Test()
+void AHT_BaseCharacter::StrongAttack()
 {
-	UHT_GameInstance* GameInstance = Cast<UHT_GameInstance>(GetWorld()->GetGameInstance());
 
-	FRotator SpawnRotation(0.f, 0.f, 0.f);
-	FVector SpawnLocal(0.f, 0.f, 100.0f);
-
-	AHT_DropItem* pItem = GetWorld()->SpawnActor<AHT_DropItem>(GameInstance->DropItemClass, SpawnLocal, SpawnRotation);
-
-	pItem->AddItem(0);
-	pItem->AddItem(1);
-	pItem->AddItem(2);
-}
-
-void AHT_BaseCharacter::Action_ItemTake()
-{
-	UHT_GameInstance* GameInstance = Cast<UHT_GameInstance>(GetWorld()->GetGameInstance());
-
-	if (GameInstance != NULL)
-	{
-		if (GameInstance->DropItemWidget->GetVisibility() == ESlateVisibility::Visible)
-		{
-			GameInstance->DropItemWidget->TakeAllDropItem();
-		}
-		else
-		{
-			FVector UserPos = GetActorLocation();
-
-			float BastDist = 99999.0f;
-
-			int Index = 0;
-
-			for (int i = 0; i < DropItemArr.Num(); ++i)
-			{
-				float Dist = (DropItemArr[i]->GetActorLocation() - UserPos).SizeSquared();
-
-				if (Dist < BastDist)
-				{
-					BastDist = Dist;
-					Index = i;
-				}
-			}
-
-			if (Index < DropItemArr.Num())
-			{
-				GameInstance->DropItemWidget->SetVisibility(ESlateVisibility::Visible);
-				GameInstance->DropItemWidget->SetDropItem(DropItemArr[Index]);
-			}
-		}
-	}
 }
 
 void AHT_BaseCharacter::OnInputTextWidget()
@@ -313,6 +261,24 @@ void AHT_BaseCharacter::DetachEquip(E_ITEM_TYPE Equip_Type)
 	DetachEquip_Server(Equip_Type);
 }
 
+void AHT_BaseCharacter::LoadEquip(TArray<FItem_Info> LoadEquipData)
+{
+	for (int i = 0; i < LoadEquipData.Num(); ++i)
+	{
+		if (LoadEquipData[i].Item_Num != -1)
+		{
+			if (i < 3)
+			{
+				EquipChange(LoadEquipData[i]);
+			}
+			else
+			{
+				WeaponChange(LoadEquipData[i]);
+			}
+		}
+	}
+}
+
 void AHT_BaseCharacter::SetPlayerState(E_PLAYER_STATE NewPlayerState)
 {
 	CurPlayerState = NewPlayerState;
@@ -370,7 +336,16 @@ void AHT_BaseCharacter::AttackBegin()
 	}
 	else
 	{
-		MoveForward(0.01f);
+		UHT_GameInstance* GameInstance = Cast<UHT_GameInstance>(GetWorld()->GetGameInstance());
+		AHT_StagePlayerState* StagePlayerStage = Cast<AHT_StagePlayerState>(PlayerState);
+
+		if (GameInstance != NULL && StagePlayerStage != NULL)
+		{
+			if (GameInstance->PlayerNum == StagePlayerStage->ClientPlayerNum)
+			{
+				MoveForward(0.5f);
+			}			
+		}
 	}
 }
 
@@ -620,17 +595,23 @@ void AHT_BaseCharacter::EquipChange_Client_Implementation(FItem_Info NewEquip)
 
 			UpperMesh->SetSkeletalMesh(GameInstance->EquipMeshs[NewEquip.Item_Num - 8]);
 
+			EquipList[0] = NewEquip.Item_Num;
+
 			break;
 
 		case E_ITEM_TYPE::ITEM_TYPE_EQUIP_LOWER:
 
 			LowerMesh->SetSkeletalMesh(GameInstance->EquipMeshs[NewEquip.Item_Num - 8]);
 
+			EquipList[1] = NewEquip.Item_Num;
+
 			break;
 
 		case E_ITEM_TYPE::ITEM_TYPE_EQUIP_FOOT:
 
 			FootMesh->SetSkeletalMesh(GameInstance->EquipMeshs[NewEquip.Item_Num - 8]);
+
+			EquipList[2] = NewEquip.Item_Num;
 
 			break;
 		}
@@ -655,17 +636,23 @@ void AHT_BaseCharacter::DetachEquip_Client_Implementation(E_ITEM_TYPE Equip_Type
 
 		UpperMesh->SetSkeletalMesh(NULL);
 
+		EquipList[0] = 0;
+
 		break;
 
 	case E_ITEM_TYPE::ITEM_TYPE_EQUIP_LOWER:
 
 		LowerMesh->SetSkeletalMesh(NULL);
 
+		EquipList[1] = 0;
+
 		break;
 
 	case E_ITEM_TYPE::ITEM_TYPE_EQUIP_FOOT:
 
 		FootMesh->SetSkeletalMesh(NULL);
+
+		EquipList[2] = 0;
 
 		break;
 
@@ -679,89 +666,209 @@ void AHT_BaseCharacter::DetachEquip_Client_Implementation(E_ITEM_TYPE Equip_Type
 	}
 }
 
+void AHT_BaseCharacter::ReflashCharacter_Server_Implementation(const FString& PlayerName, const TArray<int>& Equip)
+{
+	UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("서버에서 동기화 요청 받아들임."));
+
+	ReflashCharacter_Client(PlayerName, Equip);
+}
+
+bool AHT_BaseCharacter::ReflashCharacter_Server_Validate(const FString& PlayerName, const TArray<int>& Equip)
+{
+	return true;
+}
+
+void AHT_BaseCharacter::ReflashCharacter_Client_Implementation(const FString& PlayerName, const TArray<int>& Equip)
+{
+	if (GetWorld()->IsClient())
+	{
+		UHT_GameInstance* GameInstance = Cast<UHT_GameInstance>(GetWorld()->GetGameInstance());
+		AHT_StagePlayerState* StagePlayerStage = Cast<AHT_StagePlayerState>(PlayerState);
+
+		UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("동기화 함수 호출!!"));
+
+		if (GameInstance != NULL)
+		{
+			UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("게임 인스턴스 있음."));
+
+			if (StagePlayerStage != NULL)
+			{
+				UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("플레이어 스테이트 있음."));
+
+				if (GameInstance->PlayerNum != StagePlayerStage->ClientPlayerNum)
+				{
+					if (UserNameWidget != NULL)
+					{
+						UserNameWidget->UserName = PlayerName;
+					}
+
+					for (int i = 0; i < 3; ++i)
+					{
+						if (Equip[i] == 0)
+							continue;
+
+						if (i == 0)
+						{
+							UpperMesh->SetSkeletalMesh(GameInstance->EquipMeshs[Equip[i] - 8]);
+						}
+						else if (i == 1)
+						{
+							LowerMesh->SetSkeletalMesh(GameInstance->EquipMeshs[Equip[i] - 8]);
+						}
+						else if (i == 2)
+						{
+							FootMesh->SetSkeletalMesh(GameInstance->EquipMeshs[Equip[i] - 8]);
+						}
+					}
+				}
+			}
+			/*else
+			{
+				UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("플레이어 스테이트 없음."));
+
+				if (UserNameWidget != NULL)
+				{
+					UserNameWidget->UserName = PlayerName;
+				}
+
+				for (int i = 0; i < 3; ++i)
+				{
+					if (Equip[i] == 0)
+						continue;
+
+					if (i == 0)
+					{
+						UpperMesh->SetSkeletalMesh(GameInstance->EquipMeshs[Equip[i] - 8]);
+					}
+					else if (i == 1)
+					{
+						LowerMesh->SetSkeletalMesh(GameInstance->EquipMeshs[Equip[i] - 8]);
+					}
+					else if (i == 2)
+					{
+						FootMesh->SetSkeletalMesh(GameInstance->EquipMeshs[Equip[i] - 8]);
+					}
+				}
+			}*/
+		}
+	}
+}
+
+void AHT_BaseCharacter::OnMonsterWidget_Implementation(const FString& SpawnName, const FString& MonsterName, float PrevHealth, float CurHealth)
+{
+	UHT_GameInstance* GameInstance = Cast<UHT_GameInstance>(GetWorld()->GetGameInstance());
+
+	if (GameInstance != NULL)
+	{
+		GameInstance->MonsterHpWidget->SetVisibility(ESlateVisibility::Visible);
+
+		UTexture2D* MonsterImage = NULL;
+
+		if (MonsterName == FString("Bear"))
+		{
+			MonsterImage = GameInstance->MonsterImages[0];
+		}
+		else
+		{
+			MonsterImage = GameInstance->MonsterImages[1];
+		}
+
+		GameInstance->MonsterHpWidget->MonsterTakeDamege(SpawnName, PrevHealth, CurHealth, MonsterName, MonsterImage);
+	}
+}
+
 // Called when the game starts or when spawned
 void AHT_BaseCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
+	EquipList.Add(0);
+	EquipList.Add(0);
+	EquipList.Add(0);
+
 	if (GetWorld()->IsClient())
 	{
-		if (UserNameWidget != NULL)
-		{
-			UHT_GameInstance* GameInstance = Cast<UHT_GameInstance>(GetWorld()->GetGameInstance());
-
-			if (GameInstance != NULL)
-			{
-				AHT_StagePlayerState* StagePlayerStage = Cast<AHT_StagePlayerState>(PlayerState);
-
-				if (StagePlayerStage != NULL)
-				{
-					if (StagePlayerStage->ClientPlayerNum == GameInstance->PlayerNum)
-					{
-						UserNameWidget->UserName = GameInstance->CharacterData[GameInstance->CharacterCurIndex].Name;
-					}
-				}				
-			}
-		}
-	}
-
-	if (GetWorld()->IsClient()) //소유중인 클라이언트에서만 실행.
-	{
 		UHT_GameInstance* GameInstance = Cast<UHT_GameInstance>(GetWorld()->GetGameInstance());
-		
-		if (GameInstance != NULL)
+		AHT_StagePlayerState* StagePlayerStage = Cast<AHT_StagePlayerState>(PlayerState);
+
+		UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("Character Begin Play()"));
+
+		if (GameInstance != NULL && StagePlayerStage != NULL)
 		{
-			AHT_StagePlayerState* StagePlayerStage = Cast<AHT_StagePlayerState>(PlayerState);
+			UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("GameInstance가 있고 플레이어 스테이트 변수가 있다."));
 
-			if (StagePlayerStage != NULL)
+			if (GameInstance->PlayerNum == StagePlayerStage->ClientPlayerNum) //소유중인 클라이언트에서 1회 실행.
 			{
-				if (StagePlayerStage->ClientPlayerNum == GameInstance->PlayerNum)
+				GameInstance->PlayerStateWidget->SetOwnerPlayer(this);
+
+				CharacterName = GameInstance->CharacterData[GameInstance->CharacterCurIndex].Name;
+				
+				IsNetworkCharacter = false;
+				IsBeginPlay = true;
+
+				UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("소유중인 클라이언트!"));
+				
+				if (UserNameWidget != NULL)
 				{
-					GameInstance->PlayerStateWidget->SetOwnerPlayer(this);
-
-					UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("UI 설정 !!"));
-
+					UserNameWidget->UserName = GameInstance->CharacterData[GameInstance->CharacterCurIndex].Name;
 				}
 			}
 		}
+		else if (StagePlayerStage == NULL)
+		{
+			UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("IsNewUser 변수 변경"));
+
+			GameInstance->IsNewUser = true;
+		}
 	}
 }
-//
-//void AHT_BaseCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
-//{
-//	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-//}
 
 // Called every frame
 void AHT_BaseCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (GetWorld()->IsClient())
+	/*if (GetWorld()->IsClient())
 	{
 		UHT_GameInstance* GameInstance = Cast<UHT_GameInstance>(GetWorld()->GetGameInstance());
 
 		UScrollBox* ScrollBox = Cast<UScrollBox>(GameInstance->ChattingWidget->GetWidgetFromName("ChattingLogWidget"));
 		ScrollBox->ScrollToEnd();
-	}
+	}*/ //채팅 기능
 
-	if (GetWorld()->IsClient() && TakeItemList.Num() != 0)
+	if (GetWorld()->IsClient())
 	{
 		UHT_GameInstance* GameInstance = Cast<UHT_GameInstance>(GetWorld()->GetGameInstance());
 
-		if (GameInstance != NULL)
-		{
-			AHT_StagePlayerState* StagePlayerStage = Cast<AHT_StagePlayerState>(PlayerState);
+		AHT_StagePlayerState* StagePlayerStage = Cast<AHT_StagePlayerState>(PlayerState);
 
-			if (StagePlayerStage->ClientPlayerNum == GameInstance->PlayerNum)
+		if (GameInstance != NULL && StagePlayerStage != NULL)
+		{
+			if (StagePlayerStage->ClientPlayerNum == GameInstance->PlayerNum) //소유 중인 클라이언트의 Tick()
 			{
-				if (GameInstance->TakeItemWidget->GetVisibility() == ESlateVisibility::Collapsed)
+				if (TakeItemList.Num() != 0 && GameInstance->TakeItemWidget->GetVisibility() == ESlateVisibility::Collapsed)
 				{
 					GameInstance->TakeItemWidget->SetVisibility(ESlateVisibility::Visible);
 					GameInstance->StageWidet->PlayTakeItemAnim(TakeItemList[0]);
 
 					TakeItemList.RemoveAt(0);
-				}				
+				}
+
+				if (GameInstance->IsNewUser)
+				{
+					AccTime += DeltaTime;
+
+					if (AccTime > 2.0f)
+					{
+						AccTime = 0.0f;
+
+						UE_LOG(LogClass, Warning, TEXT("%s / %s"), TEXT("서버에 동기화 요청 !"), *CharacterName);
+
+						ReflashCharacter_Server(CharacterName, EquipList);
+
+						GameInstance->IsNewUser = false;
+					}
+				}
 			}
 		}
 	}
@@ -870,11 +977,12 @@ void AHT_BaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	{
 		PlayerInputComponent->BindAxis("Zoom", this, &AHT_BaseCharacter::Zoom);
 		PlayerInputComponent->BindAction("Inventory", IE_Pressed, this, &AHT_BaseCharacter::OnInventoryWidget);
-		PlayerInputComponent->BindAction("NpcTalk", IE_Pressed, this, &AHT_BaseCharacter::Test);
+		//PlayerInputComponent->BindAction("NpcTalk", IE_Pressed, this, &AHT_BaseCharacter::Test);
 		//PlayerInputComponent->BindAction("ItemTake", IE_Pressed, this, &AHT_BaseCharacter::Action_ItemTake);
 		PlayerInputComponent->BindAction("Enter", IE_Pressed, this, &AHT_BaseCharacter::OnInputTextWidget);
 		PlayerInputComponent->BindAction("Space", IE_Pressed, this, &AHT_BaseCharacter::OnTestFunction);
 		PlayerInputComponent->BindAction("Attack", IE_Pressed, this, &AHT_BaseCharacter::Attack);
 		PlayerInputComponent->BindAction("EquipInventory", IE_Pressed, this, &AHT_BaseCharacter::OnEquipInventoryWidget);
+		PlayerInputComponent->BindAction("StrongAttack", IE_Pressed, this, &AHT_BaseCharacter::StrongAttack);
 	}
 }

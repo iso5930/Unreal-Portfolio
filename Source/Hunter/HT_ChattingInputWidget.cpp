@@ -48,7 +48,7 @@ FString UHT_ChattingInputWidget::OnCommitted(FString InputText)
 		if (GameInstance->IsNetwork && GetWorld()->IsClient() == true)
 		{	
 			//채팅 서버 연결 됬을때.
-			ChattingText = GameInstance->UserInfo.ID + FString(TEXT(" : ")) + ChattingText;
+			ChattingText = GameInstance->CharacterData[GameInstance->CharacterCurIndex].Name + FString(TEXT(" : ")) + ChattingText;
 
 			int32 Send = 0;
 
@@ -58,7 +58,7 @@ FString UHT_ChattingInputWidget::OnCommitted(FString InputText)
 		}
 		else
 		{
-			ChattingText = GameInstance->UserInfo.ID + FString(TEXT(" : ")) + ChattingText;
+			ChattingText = GameInstance->CharacterData[GameInstance->CharacterCurIndex].Name + FString(TEXT(" : ")) + ChattingText;
 
 			UScrollBox* ScrollBox = Cast<UScrollBox>(GameInstance->ChattingWidget->GetWidgetFromName("ChattingLogWidget"));
 

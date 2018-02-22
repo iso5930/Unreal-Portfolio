@@ -135,6 +135,66 @@ bool AHT_StagePlayerController::SaveCharacterData_Validate(const TArray<FCharact
 	return true;
 }
 
+void AHT_StagePlayerController::GetPlayerEquipInventory_Implementation(const FString& PlayerName)
+{
+	FString FullPath = FString::Printf(TEXT("%s%s%s%s"), *FPaths::GameSavedDir(), TEXT("Character/"), *PlayerName, TEXT("_Equip.txt"));
+
+	TSharedPtr<FArchive> FileReader = MakeShareable(IFileManager::Get().CreateFileReader(*FullPath));
+
+	TArray<FItem_Info> EquipData;
+
+	if (FileReader.IsValid())
+	{
+		for (int i = 0; i < (int)E_EQUIP_SLOT_TYPE::EQUIP_SLOT_END; ++i)
+		{
+			FItem_Info ItemInfo;
+
+			*FileReader.Get() << ItemInfo.Item_Num;
+			
+			EquipData.Add(ItemInfo);
+		}
+
+		FileReader->Close();
+	}
+
+	SetPlayerEquipInventory(EquipData);
+}
+
+bool AHT_StagePlayerController::GetPlayerEquipInventory_Validate(const FString& PlayerName)
+{
+	return true;
+}
+
+void AHT_StagePlayerController::SaveEquipInventoryData_Implementation(const TArray<FItem_Info>& EquipData, const FString& Name)
+{
+	FString FullPath = FString::Printf(TEXT("%s%s%s%s"), *FPaths::GameSavedDir(), TEXT("Character/"), *Name, TEXT("_Equip.txt"));
+
+	UE_LOG(LogClass, Warning, TEXT("%s%s"), *FullPath, TEXT("Character Equip Inventory Save"));
+
+	FArchive* ArWriter = IFileManager::Get().CreateFileWriter(*FullPath);
+
+	if (ArWriter)
+	{
+		for (int i = 0; i < (int)E_EQUIP_SLOT_TYPE::EQUIP_SLOT_END; ++i)
+		{
+			int Num = EquipData[i].Item_Num;
+			
+			*ArWriter << Num;
+		}
+
+		ArWriter->Close();
+
+		delete ArWriter;
+
+		ArWriter = NULL;
+	}
+}
+
+bool AHT_StagePlayerController::SaveEquipInventoryData_Validate(const TArray<FItem_Info>& EquipData, const FString& Name)
+{
+	return true;
+}
+
 void AHT_StagePlayerController::SetPlayerInventory_Implementation(const TArray<FItem_Info>& Inventory)
 {
 	//∞¡ ¿ß¡¨ø° ≥—∞‹¡÷¿⁄.
@@ -144,6 +204,16 @@ void AHT_StagePlayerController::SetPlayerInventory_Implementation(const TArray<F
 	if (GameInstance != NULL)
 	{
 		GameInstance->UserInventoryWidget->NetworkInventoryLoad(Inventory);
+	}
+}
+
+void AHT_StagePlayerController::SetPlayerEquipInventory_Implementation(const TArray<FItem_Info>& EquipInventory)
+{
+	UHT_GameInstance* GameInstance = Cast<UHT_GameInstance>(GetWorld()->GetGameInstance());
+
+	if (GameInstance != NULL)
+	{
+		GameInstance->EquipWidget->NetworkEquipInventoryLoad(EquipInventory);
 	}
 }
 
@@ -206,6 +276,7 @@ void AHT_StagePlayerController::UnPossess()
 		if (GameInstance != NULL)
 		{
 			SaveInventoryData(GameInstance->UserInventoryWidget->InventoryData, GameInstance->CharacterData[GameInstance->CharacterCurIndex].Name);
+			SaveEquipInventoryData(GameInstance->EquipWidget->Equip_Data, GameInstance->CharacterData[GameInstance->CharacterCurIndex].Name);
 			SaveCharacterData(GameInstance->CharacterData, GameInstance->UserInfo.ID);
 		}
 	}

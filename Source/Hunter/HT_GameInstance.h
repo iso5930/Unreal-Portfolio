@@ -26,6 +26,8 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 	bool IsNetwork = false;
 
+	bool IsNewUser = false;
+
 public:
 	class UHT_InventoryWidget* UserInventoryWidget;
 	class UUserWidget* ChattingWidget;
@@ -70,9 +72,6 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "ChattingWidget")
 	TSubclassOf<class UUserWidget> ChattingTextWidgetClass;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "DropItem")
-	TSubclassOf<class AHT_DropItem> DropItemClass;
-
 public:
 	class FSocket* ChattingSocket;
 
@@ -90,6 +89,7 @@ public:
 
 	TArray<class USkeletalMesh*> WeaponMeshs;
 	TArray<class USkeletalMesh*> EquipMeshs;
+	TArray<class UTexture2D*> MonsterImages;
 	
 public:
 	UHT_GameInstance();
