@@ -238,10 +238,10 @@ void AHT_BaseCharacter::OnInputTextWidget()
 
 void AHT_BaseCharacter::OnTestFunction()
 {
-	/*if (OverlapNPC != NULL)
+	if (GetWorld()->IsClient() && OverlapNPC != NULL)
 	{
 		OverlapNPC->NPCMenuWidgetPopup();
-	}*/
+	}
 }
 
 FName AHT_BaseCharacter::GetWeaponAttachPointName() const
@@ -769,7 +769,7 @@ void AHT_BaseCharacter::ReflashCharacter_Client_Implementation(const FString& Pl
 	}
 }
 
-void AHT_BaseCharacter::OnMonsterWidget_Implementation(const FString& SpawnName, const FString& MonsterName, float PrevHealth, float CurHealth)
+void AHT_BaseCharacter::OnMonsterWidget_Implementation(const FString& MonsterName, float HP, float MaxHP)
 {
 	UHT_GameInstance* GameInstance = Cast<UHT_GameInstance>(GetWorld()->GetGameInstance());
 
@@ -777,18 +777,17 @@ void AHT_BaseCharacter::OnMonsterWidget_Implementation(const FString& SpawnName,
 	{
 		GameInstance->MonsterHpWidget->SetVisibility(ESlateVisibility::Visible);
 
-		UTexture2D* MonsterImage = NULL;
+		GameInstance->MonsterHpWidget->MonsterTakeDamege(MonsterName, HP, MaxHP);
+	}
+}
 
-		if (MonsterName == FString("Bear"))
-		{
-			MonsterImage = GameInstance->MonsterImages[0];
-		}
-		else
-		{
-			MonsterImage = GameInstance->MonsterImages[1];
-		}
+void AHT_BaseCharacter::RenderHitEffect_Implementation()
+{
+	if (GetWorld()->IsClient() && AttackEffect != NULL)
+	{
+		FVector EffectPos = GetActorForwardVector() * 20.0f + GetActorLocation();
 
-		GameInstance->MonsterHpWidget->MonsterTakeDamege(SpawnName, PrevHealth, CurHealth, MonsterName, MonsterImage);
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), AttackEffect, EffectPos);
 	}
 }
 

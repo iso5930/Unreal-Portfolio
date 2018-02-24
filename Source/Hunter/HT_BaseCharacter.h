@@ -80,6 +80,9 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 	class UHT_UserNameWidget* UserNameWidget;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	class UParticleSystem* AttackEffect;
+
 	float Health;
 	float MaxHealth;
 
@@ -237,9 +240,14 @@ public:
 	virtual void ReflashCharacter_Client_Implementation(const FString& PlayerName, const TArray<int>& Equip);
 
 	UFUNCTION(Client, Reliable)
-	void OnMonsterWidget(const FString& SpawnName, const FString& MonsterName, float PrevHealth, float CurHealth);
+	void OnMonsterWidget(const FString& MonsterName, float HP, float MaxHP);
 
-	void OnMonsterWidget_Implementation(const FString& SpawnName, const FString& MonsterName, float PrevHealth, float CurHealth);
+	virtual void OnMonsterWidget_Implementation(const FString& MonsterName, float HP, float MaxHP);
+
+	UFUNCTION(BlueprintCallable, NetMulticast, Reliable)
+	void RenderHitEffect();
+
+	virtual void RenderHitEffect_Implementation();
 	
 protected:
 	// Called when the game starts or when spawned

@@ -27,6 +27,7 @@ AHT_BaseMonster::AHT_BaseMonster()
 	MonsterState = E_MONSTER_STATE::MONSTER_STATE_IDLE;
 
 	Health = 600.0f;
+	MaxHealth = 600.0f;
 
 	DeathTime = 0.0f;
 
@@ -131,7 +132,7 @@ float AHT_BaseMonster::TakeDamage(float Damage, struct FDamageEvent const& Damag
 
 		if (pPlayer != NULL && GameInstance != NULL)
 		{
-			pPlayer->OnMonsterWidget(GetName(), MonsterName, Health, NewHP);
+			pPlayer->OnMonsterWidget(MonsterName, NewHP, MaxHealth);
 
 			OnSeePlayer(pPlayer);
 		}

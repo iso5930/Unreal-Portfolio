@@ -39,7 +39,11 @@ public:
 	UPROPERTY(Replicated)
 	E_MONSTER_STATE MonsterState;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float Health;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float MaxHealth;
 
 	float DeathTime;
 

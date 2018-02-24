@@ -17,9 +17,17 @@ private:
 	TArray<int> PlayerNums;
 	int PlayerCnt;
 
+	float AccTime;
+
+	bool IsBossSpawn;
+
+public:
+	AHT_StageGameMode();
+
 public:
 	virtual void PostLogin(APlayerController* NewPlayer) override;
 	virtual void Logout(AController* Exiting) override;
+	virtual void Tick(float DeltaSeconds) override;
 
 protected:
 	virtual void BeginPlay() override;

@@ -5,6 +5,13 @@
 #include "HT_StagePlayerController.h"
 #include "HT_StagePlayerState.h"
 #include "HT_BaseCharacter.h"
+#include "HT_BaseMonster.h"
+
+AHT_StageGameMode::AHT_StageGameMode()
+	:Super()
+{
+	PrimaryActorTick.bCanEverTick = true;
+}
 
 void AHT_StageGameMode::PostLogin(APlayerController* NewPlayer)
 {
@@ -42,6 +49,33 @@ void AHT_StageGameMode::Logout(AController* Exiting)
 	UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("플레이어 나감"));
 }
 
+void AHT_StageGameMode::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	AccTime += DeltaSeconds;
+
+	if (AccTime >= 2.0f && IsBossSpawn == false)
+	{
+		AccTime = 0.0f;
+
+		TArray<AActor*> MonsterList;
+
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), AHT_BaseMonster::StaticClass(), MonsterList);
+
+		if (MonsterList.Num() == 0)
+		{
+			IsBossSpawn = true;
+		}
+	}
+	else if (IsBossSpawn && AccTime >= 2.0f)
+	{
+		//보스 등장.
+
+		UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("보스 등장!!"));
+	}
+}
+
 void AHT_StageGameMode::BeginPlay()
 {
 	Super::BeginPlay();
@@ -51,7 +85,11 @@ void AHT_StageGameMode::BeginPlay()
 		PlayerNums.Add(i);
 	}
 
+	AccTime = 0.0f;
+
+	IsBossSpawn = false;
+	
 	UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("난수 초기화"));
 
-	UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("Ver 1.1.2"));
+	UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("Ver 2.1.0"));
 }
