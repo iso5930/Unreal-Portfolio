@@ -104,6 +104,8 @@ void AHT_StagePlayerController::SaveCharacterData_Implementation(const TArray<FC
 
 	FArchive* ArWriter = IFileManager::Get().CreateFileWriter(*FullPath);
 
+	//여기서 경험치 저장.
+
 	if (ArWriter)
 	{
 		FCharacter_Info CharacterInfo;
@@ -118,6 +120,8 @@ void AHT_StagePlayerController::SaveCharacterData_Implementation(const TArray<FC
 
 			*ArWriter << CharacterInfo.Name;
 			*ArWriter << CharacterInfo.Level;
+			*ArWriter << CharacterInfo.CurExp;
+			*ArWriter << CharacterInfo.MaxExp;
 
 			UE_LOG(LogClass, Warning, TEXT("%s%s%s%d"), *CharacterInfo.Name, TEXT(" Character Data Save.. / "), TEXT(" Character Level : "), CharacterInfo.Level);
 		}

@@ -36,6 +36,8 @@ void AHT_LobbyPlayerController::FindUserCharacter_Implementation(const FString& 
 
 			*FileReader.Get() << CharacterInfo.Name;
 			*FileReader.Get() << CharacterInfo.Level;
+			*FileReader.Get() << CharacterInfo.CurExp;
+			*FileReader.Get() << CharacterInfo.MaxExp;
 
 			UE_LOG(LogClass, Warning, TEXT("%s%s%s%d"), TEXT("플레이어 이름 : "), *CharacterInfo.Name, TEXT("플레이어 레벨 : "), CharacterInfo.Level);
 

@@ -15,6 +15,12 @@ struct FCharacter_Info
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CharacterInfo")
 	int Level;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CharacterInfo")
+	int CurExp;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CharacterInfo")
+	int MaxExp;
 };
 
 /**

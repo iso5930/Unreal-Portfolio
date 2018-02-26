@@ -25,10 +25,6 @@ void AHT_StageGameMode::PostLogin(APlayerController* NewPlayer)
 	{
 		int Num = (int)FMath::RandRange((float)GetNumPlayers(), 100.0f) - 1; // 0 ~ 99의 난수 발생.
 
-		/*AHT_StagePlayerController* NewPC = Cast<AHT_StagePlayerController>(NewPlayer);
-
-		NewPC->SetPlayerNum(PlayerNums[Num]);*/
-
 		AHT_StagePlayerState* PlayerState = Cast<AHT_StagePlayerState>(NewPlayer->PlayerState);
 		PlayerState->ClientSetPlayerNum(PlayerNums[Num]);
 
@@ -68,12 +64,29 @@ void AHT_StageGameMode::Tick(float DeltaSeconds)
 			IsBossSpawn = true;
 		}
 	}
-	else if (IsBossSpawn && AccTime >= 2.0f)
+	else if (IsBossSpawn && AccTime >= 2.0f && IsCreate == false)
 	{
-		//보스 등장.
+		IsCreate = true;
 
-		UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("보스 등장!!"));
+		TArray<AActor*> ActorList;
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), AActor::StaticClass(), ActorList);
+
+		int iNum = ActorList.Num();
+
+		for (int i = 0; i < iNum; ++i)
+		{
+			if (ActorList[i]->ActorHasTag(TEXT("BossSpawnPoint")))
+			{
+				GetWorld()->SpawnActor<AHT_BaseMonster>(BossMonster, ActorList[i]->GetActorLocation(), ActorList[i]->GetActorRotation());
+
+				UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("보스 몬스터 소환!"));
+
+				break;
+			}
+		}
 	}
+	
+	//몬스터가 있는지 없는지 체크. -> 없다면 2초위에 보스 생성.
 }
 
 void AHT_StageGameMode::BeginPlay()
@@ -88,6 +101,7 @@ void AHT_StageGameMode::BeginPlay()
 	AccTime = 0.0f;
 
 	IsBossSpawn = false;
+	IsCreate = false;
 	
 	UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("난수 초기화"));
 

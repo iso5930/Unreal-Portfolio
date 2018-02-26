@@ -128,6 +128,7 @@ float AHT_BaseMonster::TakeDamage(float Damage, struct FDamageEvent const& Damag
 			if (pPlayer != NULL && GameInstance != NULL)
 			{
 				pPlayer->AddItem(GameInstance->Item_DataBase[2]);
+				pPlayer->AddExp(70);
 			}
 		}
 
@@ -182,10 +183,6 @@ void AHT_BaseMonster::ClientTakeDamege_Implementation(float NewHp)
 
 			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), AttackEffect, EffectPos);
 		}
-
-		//if()
-
-		
 
 		UE_LOG(LogClass, Warning, TEXT("%s %f"), TEXT("몬스터 남은 체력"), NewHp);
 

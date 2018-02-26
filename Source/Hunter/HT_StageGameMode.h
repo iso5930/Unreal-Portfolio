@@ -20,6 +20,11 @@ private:
 	float AccTime;
 
 	bool IsBossSpawn;
+	bool IsCreate;
+
+public:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "BossMonster")
+	TSubclassOf<class AHT_BaseMonster> BossMonster;
 
 public:
 	AHT_StageGameMode();

@@ -77,17 +77,17 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void ClientTakeDamege(float NewHp);
 
-	void ClientTakeDamege_Implementation(float NewHp);
+	virtual void ClientTakeDamege_Implementation(float NewHp);
 
 	UFUNCTION(NetMulticast, Reliable)
 	void MonsterAttack();
 
-	void MonsterAttack_Implementation();
+	virtual void MonsterAttack_Implementation();
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Troll_Attack(int Num);
 
-	void Troll_Attack_Implementation(int Num);
+	virtual void Troll_Attack_Implementation(int Num);
 
 protected:
 	// Called when the game starts or when spawned

@@ -14,6 +14,8 @@ void UHT_CharacterCreateWidget::CreateCharacter(FString Name)
 
 	Info.Name = Name;
 	Info.Level = 1;
+	Info.CurExp = 10;
+	Info.MaxExp = 100;
 
 	UHT_GameInstance* GameInstance = Cast<UHT_GameInstance>(GetWorld()->GetGameInstance());
 

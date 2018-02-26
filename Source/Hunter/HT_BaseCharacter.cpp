@@ -85,11 +85,7 @@ AHT_BaseCharacter::AHT_BaseCharacter()
 	FootMesh->SetupAttachment(pMesh);
 	FootMesh->SetMasterPoseComponent(pMesh);
 
-	MaxHealth = 600.0f;
-	Health = 600.0f;
-
-	MaxMana = 200.0f;
-	Mana = 200.0f;		
+	
 }
 
 void AHT_BaseCharacter::MoveForward(float Value)
@@ -791,6 +787,43 @@ void AHT_BaseCharacter::RenderHitEffect_Implementation()
 	}*/ //몬스터 쪽으로 변경.
 }
 
+void AHT_BaseCharacter::AddExp_Implementation(int Exp)
+{
+	if (GetWorld()->IsClient())
+	{
+		UHT_GameInstance* GameInstance = Cast<UHT_GameInstance>(GetWorld()->GetGameInstance());
+
+		if (GameInstance != NULL)
+		{
+			int CurExp = GameInstance->CharacterData[GameInstance->CharacterCurIndex].CurExp + Exp;
+
+			if (CurExp > GameInstance->CharacterData[GameInstance->CharacterCurIndex].MaxExp)
+			{
+				//경험치과 초과하여 레벨업을 해야 한다.
+
+				int PlayerLevel = ++GameInstance->CharacterData[GameInstance->CharacterCurIndex].Level;
+
+				CurExp = CurExp - GameInstance->CharacterData[GameInstance->CharacterCurIndex].MaxExp;
+
+				GameInstance->CharacterData[GameInstance->CharacterCurIndex].MaxExp = GameInstance->CharacterData[GameInstance->CharacterCurIndex].Level * 150;
+
+				MaxHealth = PlayerLevel * 600.0f;
+				Health = MaxHealth;
+
+				MaxMana = PlayerLevel * 300.0f;
+				Mana = MaxMana;
+				/*
+				
+				레벨업을 추가한다면 여기서 서버측에 멀티캐스트로 이펙트 생성을 요청하자.
+
+				*/
+			}
+
+			GameInstance->CharacterData[GameInstance->CharacterCurIndex].CurExp = CurExp;
+		}
+	}
+}
+
 // Called when the game starts or when spawned
 void AHT_BaseCharacter::BeginPlay()
 {
@@ -816,9 +849,17 @@ void AHT_BaseCharacter::BeginPlay()
 				GameInstance->PlayerStateWidget->SetOwnerPlayer(this);
 
 				CharacterName = GameInstance->CharacterData[GameInstance->CharacterCurIndex].Name;
-				
+
 				IsNetworkCharacter = false;
 				IsBeginPlay = true;
+
+				int PlayerLevel = GameInstance->CharacterData[GameInstance->CharacterCurIndex].Level;
+
+				MaxHealth = PlayerLevel * 600.0f;
+				Health = MaxHealth;
+
+				MaxMana = PlayerLevel * 300.0f;
+				Mana = MaxMana;
 
 				UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("소유중인 클라이언트!"));
 				

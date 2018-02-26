@@ -248,6 +248,11 @@ public:
 	void RenderHitEffect();
 
 	virtual void RenderHitEffect_Implementation();
+
+	UFUNCTION(Client, Reliable)
+	void AddExp(int Exp);
+
+	virtual void AddExp_Implementation(int Exp);
 	
 protected:
 	// Called when the game starts or when spawned
