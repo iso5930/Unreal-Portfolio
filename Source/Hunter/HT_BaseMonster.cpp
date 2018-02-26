@@ -8,6 +8,7 @@
 #include "HT_GameInstance.h"
 #include "HT_MonsterHpWidget.h"
 #include "HT_BaseCharacter.h"
+#include "HT_DamegeEffect.h"
 
 // Sets default values
 AHT_BaseMonster::AHT_BaseMonster()
@@ -137,6 +138,19 @@ float AHT_BaseMonster::TakeDamage(float Damage, struct FDamageEvent const& Damag
 			OnSeePlayer(pPlayer);
 		}
 
+		if (DamegeEffect != NULL)
+		{
+			FVector SpawnLocal = GetActorLocation() + GetActorUpVector() * 20.0f;
+			FRotator SpawnRotation;
+
+			AHT_DamegeEffect* SpawnEffect = GetWorld()->SpawnActor<AHT_DamegeEffect>(DamegeEffect, SpawnLocal, SpawnRotation);
+
+			if (SpawnEffect != NULL)
+			{
+				SpawnEffect->Damege = Damage;
+			}
+		}
+
 		Health = NewHP;
 
 		UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("서버 충돌 함수"));
@@ -161,6 +175,17 @@ void AHT_BaseMonster::ClientTakeDamege_Implementation(float NewHp)
 				AIController->SetTarget(NULL);
 			}
 		}
+
+		if (AttackEffect != NULL)
+		{
+			FVector EffectPos = GetActorForwardVector() * 30.0f + GetActorLocation();
+
+			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), AttackEffect, EffectPos);
+		}
+
+		//if()
+
+		
 
 		UE_LOG(LogClass, Warning, TEXT("%s %f"), TEXT("몬스터 남은 체력"), NewHp);
 

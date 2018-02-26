@@ -29,6 +29,12 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 	FString MonsterName;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	class UParticleSystem* AttackEffect;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Damege Effect")
+	TSubclassOf<class AHT_DamegeEffect> DamegeEffect;
+
 	UAnimMontage* Attack_Montage;
 
 	UAnimMontage* TrollAttack_MontageA;

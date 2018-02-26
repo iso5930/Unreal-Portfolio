@@ -252,6 +252,7 @@ void AHT_StagePlayerController::BeginPlay()
 			GameInstance->EquipWidget->SetVisibility(ESlateVisibility::Collapsed);
 
 			GameInstance->MonsterHpWidget = Cast<UHT_MonsterHpWidget>(NewWidget->GetWidgetFromName("MonsterHpWidget"));
+			GameInstance->MonsterHpWidget->SetVisibility(ESlateVisibility::Collapsed);
 
 			GameInstance->PlayerStateWidget = Cast<UHT_PlayerStateWidget>(NewWidget->GetWidgetFromName("PlayerStateWidget"));
 

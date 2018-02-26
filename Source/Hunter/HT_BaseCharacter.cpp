@@ -783,12 +783,12 @@ void AHT_BaseCharacter::OnMonsterWidget_Implementation(const FString& MonsterNam
 
 void AHT_BaseCharacter::RenderHitEffect_Implementation()
 {
-	if (GetWorld()->IsClient() && AttackEffect != NULL)
+	/*if (GetWorld()->IsClient() && AttackEffect != NULL)
 	{
 		FVector EffectPos = GetActorForwardVector() * 20.0f + GetActorLocation();
 
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), AttackEffect, EffectPos);
-	}
+	}*/ //몬스터 쪽으로 변경.
 }
 
 // Called when the game starts or when spawned
