@@ -77,7 +77,9 @@ void AHT_StageGameMode::Tick(float DeltaSeconds)
 		{
 			if (ActorList[i]->ActorHasTag(TEXT("BossSpawnPoint")))
 			{
-				GetWorld()->SpawnActor<AHT_BaseMonster>(BossMonster, ActorList[i]->GetActorLocation(), ActorList[i]->GetActorRotation());
+				AHT_BaseMonster* Boss = GetWorld()->SpawnActor<AHT_BaseMonster>(BossMonster, ActorList[i]->GetActorLocation(), ActorList[i]->GetActorRotation());
+
+				Boss->SpawnDefaultController();
 
 				UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("보스 몬스터 소환!"));
 
@@ -103,7 +105,7 @@ void AHT_StageGameMode::BeginPlay()
 	IsBossSpawn = false;
 	IsCreate = false;
 	
-	UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("난수 초기화"));
+	/*UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("난수 초기화"));
 
-	UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("Ver 2.1.0"));
+	UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("Ver 2.1.0"));*/
 }

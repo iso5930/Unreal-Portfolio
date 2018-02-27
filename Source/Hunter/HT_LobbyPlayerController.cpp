@@ -145,21 +145,20 @@ void AHT_LobbyPlayerController::CharacterNameCheck_Implementation(const FString&
 		{
 		case E_WEAPON_TYPE::WEAPON_SCYTHE:
 
-			StartWeapon.Item_Num = 6;
+			Inventory[0].Item_Num = 6;
 
 			break;
 
 		case E_WEAPON_TYPE::WEAPON_DUAL_BLADE:
 
-			StartWeapon.Item_Num = 7;
+			Inventory[0].Item_Num = 7;
 
 			break;
 		}
 
-		for (int j = 0; j < 17; ++j)
-		{
-			Inventory[j].Item_Num = j;
-		}
+		Inventory[1].Item_Num = 8;
+		Inventory[2].Item_Num = 11;
+		Inventory[3].Item_Num = 14;
 
 		int InventorySize = Inventory.Num();
 

@@ -70,6 +70,8 @@ private:
 
 	float AccTime = 0.0f;
 
+	int Level = 1;
+
 public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Weapon)
 	FName WeaponAttachPointName;
@@ -146,6 +148,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void ShowLog(FString Log);
+
+	UFUNCTION(BlueprintCallable)
+	int GetDamege();
 
 public:
 	UFUNCTION()
@@ -253,6 +258,14 @@ public:
 	void AddExp(int Exp);
 
 	virtual void AddExp_Implementation(int Exp);
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void SetPlayerLevel(int NewLevel);
+
+	virtual void SetPlayerLevel_Implementation(int NewLevel);
+
+	bool SetPlayerLevel_Validate(int NewLevel);
+
 	
 protected:
 	// Called when the game starts or when spawned

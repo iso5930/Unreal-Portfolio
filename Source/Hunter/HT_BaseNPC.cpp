@@ -64,6 +64,11 @@ void AHT_BaseNPC::NPCMenuWidgetPopup()
 void AHT_BaseNPC::BeginPlay()
 {
 	Super::BeginPlay();
+
+	for (int i = 0; i < 17; ++i)
+	{
+		StoreItem.Add(i);
+	}
 }
 
 // Called every frame

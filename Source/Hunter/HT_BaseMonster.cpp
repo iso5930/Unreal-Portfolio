@@ -37,8 +37,6 @@ AHT_BaseMonster::AHT_BaseMonster()
 	if (AnimMontage1.Object != NULL)
 	{
 		Attack_Montage = AnimMontage1.Object;
-
-		UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("베어 불러오기 성공"));
 	}
 
 	ConstructorHelpers::FObjectFinder<UAnimMontage> AnimMontage2(TEXT("/Game/Monster/Troll/Animations/Montage/Troll_AttackA01_Montage"));
@@ -61,8 +59,6 @@ AHT_BaseMonster::AHT_BaseMonster()
 	{
 		TrollAttack_MontageC = AnimMontage4.Object;
 	}
-
-	//Bear_MeleeAttack
 }
 
 void AHT_BaseMonster::OnSeePlayer(APawn* InPawn)
@@ -127,7 +123,18 @@ float AHT_BaseMonster::TakeDamage(float Damage, struct FDamageEvent const& Damag
 
 			if (pPlayer != NULL && GameInstance != NULL)
 			{
-				pPlayer->AddItem(GameInstance->Item_DataBase[2]);
+				bool IsEquip = (int)FMath::RandRange(0.0f, 10.0f) % 2;
+
+				if (IsEquip)
+				{
+					int ItemNum = (int)FMath::RandRange(8.0f, 16.9f);
+
+					pPlayer->AddItem(GameInstance->Item_DataBase[ItemNum]);
+				}
+
+				int ItemNum = (int)FMath::RandRange(0.0f, 5.9f);
+
+				pPlayer->AddItem(GameInstance->Item_DataBase[ItemNum]);
 				pPlayer->AddExp(70);
 			}
 		}
@@ -141,8 +148,15 @@ float AHT_BaseMonster::TakeDamage(float Damage, struct FDamageEvent const& Damag
 
 		if (DamegeEffect != NULL)
 		{
-			FVector SpawnLocal = GetActorLocation() + GetActorUpVector() * 20.0f;
-			FRotator SpawnRotation;
+			float Dist = 20.0f;
+
+			if (MonsterName != "Bear")
+			{
+				Dist = 40.0f;
+			}
+
+			FVector SpawnLocal = GetActorLocation() + GetActorUpVector() * Dist;
+			FRotator SpawnRotation = GetActorRotation();
 
 			AHT_DamegeEffect* SpawnEffect = GetWorld()->SpawnActor<AHT_DamegeEffect>(DamegeEffect, SpawnLocal, SpawnRotation);
 

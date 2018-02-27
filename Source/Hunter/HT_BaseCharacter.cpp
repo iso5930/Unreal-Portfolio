@@ -366,6 +366,24 @@ void AHT_BaseCharacter::ShowLog(FString Log)
 	UE_LOG(LogClass, Warning, TEXT("%s"), *Log);
 }
 
+int AHT_BaseCharacter::GetDamege()
+{
+	int Power = 0.0f;
+
+	//계수는 같고 스매시 공격은 뒤에 1.5만 추가.
+
+	if (Weapon->GetWeaponType() == E_WEAPON_TYPE::WEAPON_SCYTHE)
+	{
+		Power = 20.0f * 1.5f;
+	}
+	else
+	{
+		Power = 20.0f;
+	}
+
+	return ((int)CurPlayerState - 1) * Power * Level;
+}
+
 void AHT_BaseCharacter::OnWeaponAttackOverlap(class UPrimitiveComponent* OverlappingComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	if (GetWorld()->IsServer() && OtherActor->IsA(AHT_BaseMonster::StaticClass()))
@@ -374,7 +392,21 @@ void AHT_BaseCharacter::OnWeaponAttackOverlap(class UPrimitiveComponent* Overlap
 
 		//데미지가 유동적으로 변하도록 바꾸자.
 
-		UGameplayStatics::ApplyDamage(OtherActor, 60.0f, NULL, this, UDamageType::StaticClass());
+		//플레이어의 데미지를
+
+		//여기는 낫 일반 공격으로만 들어 오는 곳
+
+		//일반 공격 -> 1타 ~ 4타 * 20.0f(계수) * Level * 1.5f  
+
+		//스매시 공격 -> 1타 ~ 4타 * 35.0f * level * 1.5f;
+
+		//레벨업을 하면 공격력 계수를 올려준다 낫의 경우는 * 1.5f
+
+		int Damage = GetDamege();
+
+		UE_LOG(LogClass, Warning, TEXT("%d"), Damage);
+
+		UGameplayStatics::ApplyDamage(OtherActor, (float)Damage, NULL, this, UDamageType::StaticClass());
 	}
 }
 
@@ -515,12 +547,6 @@ bool AHT_BaseCharacter::BeginStrongAttack_Validate()
 
 void AHT_BaseCharacter::PointDamage(float Damage)
 {
-	/*
-	
-	서버에서 깍아주는 PointDamage;
-
-	*/
-
 	Health -= Damage;
 
 	if (Health <= 0.0f)
@@ -531,12 +557,6 @@ void AHT_BaseCharacter::PointDamage(float Damage)
 	ClientPointDamege(Health);
 
 	UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("서버 플레이어 포인트 데미지 함수 호출"));
-
-	/*
-	
-	피격 몽타주, 죽음 몽타주.
-	
-	*/
 }
 
 void AHT_BaseCharacter::ClientPointDamege_Implementation(float NewHealth)
@@ -779,12 +799,7 @@ void AHT_BaseCharacter::OnMonsterWidget_Implementation(const FString& MonsterNam
 
 void AHT_BaseCharacter::RenderHitEffect_Implementation()
 {
-	/*if (GetWorld()->IsClient() && AttackEffect != NULL)
-	{
-		FVector EffectPos = GetActorForwardVector() * 20.0f + GetActorLocation();
-
-		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), AttackEffect, EffectPos);
-	}*/ //몬스터 쪽으로 변경.
+	
 }
 
 void AHT_BaseCharacter::AddExp_Implementation(int Exp)
@@ -801,17 +816,19 @@ void AHT_BaseCharacter::AddExp_Implementation(int Exp)
 			{
 				//경험치과 초과하여 레벨업을 해야 한다.
 
-				int PlayerLevel = ++GameInstance->CharacterData[GameInstance->CharacterCurIndex].Level;
+				Level = ++GameInstance->CharacterData[GameInstance->CharacterCurIndex].Level;
 
 				CurExp = CurExp - GameInstance->CharacterData[GameInstance->CharacterCurIndex].MaxExp;
 
 				GameInstance->CharacterData[GameInstance->CharacterCurIndex].MaxExp = GameInstance->CharacterData[GameInstance->CharacterCurIndex].Level * 150;
 
-				MaxHealth = PlayerLevel * 600.0f;
+				MaxHealth = Level * 600.0f;
 				Health = MaxHealth;
 
-				MaxMana = PlayerLevel * 300.0f;
+				MaxMana = Level * 300.0f;
 				Mana = MaxMana;
+
+				SetPlayerLevel(Level);
 				/*
 				
 				레벨업을 추가한다면 여기서 서버측에 멀티캐스트로 이펙트 생성을 요청하자.
@@ -822,6 +839,16 @@ void AHT_BaseCharacter::AddExp_Implementation(int Exp)
 			GameInstance->CharacterData[GameInstance->CharacterCurIndex].CurExp = CurExp;
 		}
 	}
+}
+
+void AHT_BaseCharacter::SetPlayerLevel_Implementation(int NewLevel)
+{
+	Level = NewLevel;
+}
+
+bool AHT_BaseCharacter::SetPlayerLevel_Validate(int NewLevel)
+{
+	return true;
 }
 
 // Called when the game starts or when spawned
@@ -853,13 +880,16 @@ void AHT_BaseCharacter::BeginPlay()
 				IsNetworkCharacter = false;
 				IsBeginPlay = true;
 
-				int PlayerLevel = GameInstance->CharacterData[GameInstance->CharacterCurIndex].Level;
+				Level = GameInstance->CharacterData[GameInstance->CharacterCurIndex].Level;
 
-				MaxHealth = PlayerLevel * 600.0f;
+				MaxHealth = Level * 600.0f;
 				Health = MaxHealth;
 
-				MaxMana = PlayerLevel * 300.0f;
+				MaxMana = Level * 300.0f;
 				Mana = MaxMana;
+
+				//서버에 동기화 요청.
+				SetPlayerLevel(Level);
 
 				UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("소유중인 클라이언트!"));
 				
