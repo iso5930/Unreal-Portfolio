@@ -13,8 +13,7 @@
 // Sets default values
 AHT_BaseMonster::AHT_BaseMonster()
 {
- 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;//false;
+	PrimaryActorTick.bCanEverTick = true;
 
 	bUseControllerRotationYaw = true;
 
@@ -22,9 +21,8 @@ AHT_BaseMonster::AHT_BaseMonster()
 
 	PawnSensing = CreateDefaultSubobject<UPawnSensingComponent>(TEXT("PawnSensing"));
 	PawnSensing->SensingInterval = 0.25f;
-
 	PawnSensing->OnSeePawn.AddDynamic(this, &AHT_BaseMonster::OnSeePlayer);
-
+	
 	MonsterState = E_MONSTER_STATE::MONSTER_STATE_IDLE;
 
 	Health = 600.0f;
@@ -197,8 +195,6 @@ void AHT_BaseMonster::ClientTakeDamege_Implementation(float NewHp)
 
 			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), AttackEffect, EffectPos);
 		}
-
-		UE_LOG(LogClass, Warning, TEXT("%s %f"), TEXT("몬스터 남은 체력"), NewHp);
 
 		Health = NewHp;
 	}

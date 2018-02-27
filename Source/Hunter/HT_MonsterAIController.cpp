@@ -129,7 +129,7 @@ void AHT_MonsterAIController::MonsterAttack02()
 	{
 		//·£´ý °ª ¼³Á¤.
 
-		int Num = (int)FMath::RandRange(0.0f, 2.0f);
+		int Num = (int)FMath::RandRange(0.0f, 2.9f);
 
 		pMonster->Troll_Attack(Num);
 		
