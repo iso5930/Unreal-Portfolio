@@ -196,7 +196,12 @@ void AHT_BaseCharacter::StrongAttack()
 {
 	if (Weapon != NULL)
 	{
-		BeginStrongAttack();
+		float NewMana = Mana - (int)CurPlayerState * 10;
+
+		if (NewMana > 0)
+		{
+			BeginStrongAttack();
+		}		
 	}
 }
 
@@ -416,7 +421,7 @@ void AHT_BaseCharacter::OnOverlapBegin(class UPrimitiveComponent* OverlappingCom
 	{
 		DropItemArr.Add((AHT_DropItem*)OtherActor);
 	}
-	else if (OtherActor->IsA(AHT_BaseNPC::StaticClass()) && GetWorld()->IsServer())
+	else if (OtherActor->IsA(AHT_BaseNPC::StaticClass()) && GetWorld()->IsClient())
 	{
 		OverlapNPC = Cast<AHT_BaseNPC>(OtherActor);
 
@@ -873,13 +878,20 @@ void AHT_BaseCharacter::BeginPlay()
 
 			if (GameInstance->PlayerNum == StagePlayerStage->ClientPlayerNum) //소유중인 클라이언트에서 1회 실행.
 			{
-				GameInstance->PlayerStateWidget->SetOwnerPlayer(this);
+				UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("위젯 설정"));
 
+				if (GameInstance->PlayerStateWidget != NULL)
+				{
+					GameInstance->PlayerStateWidget->SetOwnerPlayer(this);
+				}				
+
+				UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("이름 받아오기"));
 				CharacterName = GameInstance->CharacterData[GameInstance->CharacterCurIndex].Name;
 
 				IsNetworkCharacter = false;
 				IsBeginPlay = true;
 
+				UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("레벨 받아오기"));
 				Level = GameInstance->CharacterData[GameInstance->CharacterCurIndex].Level;
 
 				MaxHealth = Level * 600.0f;
@@ -889,6 +901,7 @@ void AHT_BaseCharacter::BeginPlay()
 				Mana = MaxMana;
 
 				//서버에 동기화 요청.
+				UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("동기화 요청"));
 				SetPlayerLevel(Level);
 
 				UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("소유중인 클라이언트!"));
@@ -953,6 +966,15 @@ void AHT_BaseCharacter::Tick(float DeltaTime)
 
 						GameInstance->IsNewUser = false;
 					}
+				}
+
+				static bool IsStateWidget = false;
+
+				if (IsStateWidget == false && GameInstance->PlayerStateWidget != NULL)
+				{
+					IsStateWidget = true;
+
+					GameInstance->PlayerStateWidget->SetOwnerPlayer(this);
 				}
 			}
 		}

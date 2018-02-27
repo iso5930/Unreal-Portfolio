@@ -160,8 +160,8 @@ void AHT_BaseWeapon::StrongAttack_Implementation()
 
 	float NewMana = OwnerCharacter->Mana - (int)PlayerState * 10;
 
-	if (NewMana < 0)
-		return;
+	//if (NewMana < 0)
+	//	return; //ÀÌ°Å ¶«¿¡...
 
 	if (PlayerState == E_PLAYER_STATE::PLAYER_STATE_ATTACK01 && IsNextAttack)
 	{
