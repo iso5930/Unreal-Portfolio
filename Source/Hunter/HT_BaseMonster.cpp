@@ -144,6 +144,8 @@ float AHT_BaseMonster::TakeDamage(float Damage, struct FDamageEvent const& Damag
 			OnSeePlayer(pPlayer);
 		}
 
+		UE_LOG(LogClass, Warning, TEXT("%s%f"), TEXT("데미지 량 : "), Damage);
+
 		if (DamegeEffect != NULL)
 		{
 			float Dist = 20.0f;
@@ -160,6 +162,8 @@ float AHT_BaseMonster::TakeDamage(float Damage, struct FDamageEvent const& Damag
 
 			if (SpawnEffect != NULL)
 			{
+				UE_LOG(LogClass, Warning, TEXT("%s%f"), TEXT("데미지 세팅"), Damage);
+
 				SpawnEffect->Damege = Damage;
 			}
 		}

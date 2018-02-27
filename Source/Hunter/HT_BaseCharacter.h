@@ -260,11 +260,11 @@ public:
 	virtual void AddExp_Implementation(int Exp);
 
 	UFUNCTION(Server, Reliable, WithValidation)
-	void SetPlayerLevel(int NewLevel);
+	void SetPlayerLevel(int NewLevel, float MaxHP, float MaxMp);
 
-	virtual void SetPlayerLevel_Implementation(int NewLevel);
+	virtual void SetPlayerLevel_Implementation(int NewLevel, float MaxHP, float MaxMp);
 
-	bool SetPlayerLevel_Validate(int NewLevel);
+	bool SetPlayerLevel_Validate(int NewLevel, float MaxHP, float MaxMp);
 
 	
 protected:

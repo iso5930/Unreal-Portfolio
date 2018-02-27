@@ -833,7 +833,7 @@ void AHT_BaseCharacter::AddExp_Implementation(int Exp)
 				MaxMana = Level * 300.0f;
 				Mana = MaxMana;
 
-				SetPlayerLevel(Level);
+				SetPlayerLevel(Level, MaxHealth, MaxMana);
 				/*
 				
 				레벨업을 추가한다면 여기서 서버측에 멀티캐스트로 이펙트 생성을 요청하자.
@@ -846,12 +846,15 @@ void AHT_BaseCharacter::AddExp_Implementation(int Exp)
 	}
 }
 
-void AHT_BaseCharacter::SetPlayerLevel_Implementation(int NewLevel)
+void AHT_BaseCharacter::SetPlayerLevel_Implementation(int NewLevel, float MaxHP, float MaxMp)
 {
 	Level = NewLevel;
+
+	Health = MaxHealth = MaxHP;
+	Mana = MaxMana = MaxMp;
 }
 
-bool AHT_BaseCharacter::SetPlayerLevel_Validate(int NewLevel)
+bool AHT_BaseCharacter::SetPlayerLevel_Validate(int NewLevel, float MaxHP, float MaxMp)
 {
 	return true;
 }
@@ -902,7 +905,7 @@ void AHT_BaseCharacter::BeginPlay()
 
 				//서버에 동기화 요청.
 				UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("동기화 요청"));
-				SetPlayerLevel(Level);
+				SetPlayerLevel(Level, MaxHealth, MaxMana);
 
 				UE_LOG(LogClass, Warning, TEXT("%s"), TEXT("소유중인 클라이언트!"));
 				
